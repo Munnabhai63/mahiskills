@@ -17,6 +17,7 @@ import {
   MessageSquare,
   ExternalLink,
   Shield,
+  Bell,
 } from 'lucide-react';
 
 export default function AdminSidebar() {
@@ -24,6 +25,7 @@ export default function AdminSidebar() {
 
   const navItems = [
     { name: 'Analytics', href: '/admin', icon: LayoutDashboard },
+    { name: 'Broadcast Alerts', href: '/admin/notifications', icon: Bell },
     { name: 'Courses', href: '/admin/courses', icon: BookOpen },
     { name: 'Students', href: '/admin/students', icon: Users },
     { name: 'Orders & Payments', href: '/admin/orders', icon: CreditCard },

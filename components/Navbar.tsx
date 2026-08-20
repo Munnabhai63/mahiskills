@@ -21,6 +21,7 @@ import {
   Sun,
   Moon,
 } from 'lucide-react';
+import NotificationBell from '@/components/NotificationBell';
 
 interface NavbarProps {
   onOpenSearch?: () => void;
@@ -127,6 +128,9 @@ export default function Navbar({ onOpenSearch }: NavbarProps) {
           >
             <Search className="w-5 h-5" />
           </button>
+
+          {/* Notification Bell */}
+          <NotificationBell />
 
           {/* Cart Trigger */}
           <button

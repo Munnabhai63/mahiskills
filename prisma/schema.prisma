@@ -20,12 +20,13 @@ model User {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
-  enrollments     Enrollment[]
-  lessonProgress  LessonProgress[]
-  orders          Order[]
-  sessionBookings SessionBooking[]
-  reviews         Review[]
-  certificates    Certificate[]
+  enrollments       Enrollment[]
+  lessonProgress    LessonProgress[]
+  orders            Order[]
+  sessionBookings   SessionBooking[]
+  reviews           Review[]
+  certificates      Certificate[]
+  notificationReads NotificationRead[]
 }
 
 model Course {
@@ -286,4 +287,29 @@ model SiteSetting {
   group     String   @default("general") // general, hero, stats, founder, social, session
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Notification {
+  id          String   @id @default(uuid())
+  title       String
+  message     String
+  type        String   @default("ANNOUNCEMENT") // ANNOUNCEMENT, COURSE_UPDATE, LIVE_SESSION, PROMO, ALERT
+  targetRole  String   @default("ALL") // ALL, STUDENT
+  link        String?
+  senderName  String   @default("Munna Bhai")
+  createdAt   DateTime @default(now())
+
+  reads NotificationRead[]
+}
+
+model NotificationRead {
+  id             String       @id @default(uuid())
+  notificationId String
+  userId         String
+  readAt         DateTime     @default(now())
+
+  notification Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([notificationId, userId])
 }

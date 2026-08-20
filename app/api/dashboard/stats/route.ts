@@ -9,7 +9,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const [enrollments, sessions, orders, certificates] = await Promise.all([
+    const [enrollments, sessions, orders, certificates, notifications] = await Promise.all([
       prisma.enrollment.findMany({
         where: { userId: user.id },
         include: {
@@ -39,6 +39,10 @@ export async function GET() {
       prisma.certificate.findMany({
         where: { userId: user.id },
         orderBy: { issueDate: 'desc' },
+      }),
+      prisma.notification.findMany({
+        orderBy: { createdAt: 'desc' },
+        take: 20,
       }),
     ]);
 
@@ -73,6 +77,7 @@ export async function GET() {
       sessions,
       orders,
       certificates,
+      notifications,
     });
   } catch (error) {
     console.error('Dashboard stats error:', error);

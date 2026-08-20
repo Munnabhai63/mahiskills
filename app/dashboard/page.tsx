@@ -18,6 +18,8 @@ import {
   CheckCircle2,
   Lock,
   ArrowRight,
+  Bell,
+  Sparkles,
 } from 'lucide-react';
 
 export default function StudentDashboardPage() {
@@ -161,6 +163,7 @@ export default function StudentDashboardPage() {
       <div className="flex items-center gap-2 overflow-x-auto border-b border-slate-200 dark:border-white/10 pb-2">
         {[
           { id: 'courses', label: 'My Courses', icon: BookOpen },
+          { id: 'announcements', label: 'Announcements', icon: Bell },
           { id: 'sessions', label: '1:1 Sessions', icon: Calendar },
           { id: 'certificates', label: 'Certificates', icon: Award },
           { id: 'orders', label: 'Order History', icon: CreditCard },
@@ -507,6 +510,60 @@ export default function StudentDashboardPage() {
             </button>
           </div>
         </form>
+      )}
+
+      {/* TAB CONTENT: ANNOUNCEMENTS & BROADCASTS */}
+      {activeTab === 'announcements' && (
+        <div className="space-y-6">
+          <div className="p-6 rounded-3xl bg-white dark:bg-[#0B1728] border border-slate-200 dark:border-white/10 space-y-4">
+            <div className="flex items-center gap-2 border-b border-slate-100 dark:border-white/10 pb-4">
+              <div className="w-8 h-8 rounded-xl bg-[#D6A84F]/20 text-[#C49339] dark:text-[#F0C96A] flex items-center justify-center font-bold">
+                <Bell className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">Official Broadcasts from Munna Bhai</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Class schedules, live Q&A links, and high-value community updates.</p>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              {stats?.notifications?.length === 0 ? (
+                <div className="py-12 text-center text-xs text-slate-400">
+                  No announcements at the moment. You are all up to date!
+                </div>
+              ) : (
+                (stats?.notifications || []).map((n: any) => (
+                  <div
+                    key={n.id}
+                    className="p-4 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 space-y-2"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#D6A84F]/20 text-[#C49339] dark:text-[#F0C96A]">
+                          {n.type}
+                        </span>
+                        <h4 className="text-sm font-bold text-slate-900 dark:text-white">{n.title}</h4>
+                      </div>
+                      <span className="text-[11px] text-slate-400">{new Date(n.createdAt).toLocaleDateString()}</span>
+                    </div>
+                    <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">{n.message}</p>
+                    {n.link && (
+                      <a
+                        href={n.link}
+                        target={n.link.startsWith('http') ? '_blank' : '_self'}
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-xs font-bold text-[#C49339] dark:text-[#F0C96A] hover:underline pt-1"
+                      >
+                        <span>View Attached Link</span>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
