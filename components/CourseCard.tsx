@@ -61,33 +61,16 @@ export default function CourseCard({
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
             />
           )}
-          {/* Subtle gradient overlay at bottom for text readability */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-
-          {/* Badge */}
-          {badge && (
-            <span className="absolute top-3 left-3 px-2.5 py-1 rounded-lg bg-[#D6A84F] text-[#05080D] font-black text-[10px] uppercase tracking-wider shadow-lg shadow-[#D6A84F]/30 z-10">
-              {badge}
-            </span>
-          )}
-
-          {/* Discount Badge */}
-          {discount && discount > 0 && (
-            <span className="absolute top-3 right-3 px-2 py-1 rounded-lg bg-red-500 text-white font-black text-[10px] uppercase shadow-lg z-10">
-              {discount}% OFF
-            </span>
-          )}
-
-          {/* Course Title on image */}
-          <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
-            <h3 className="text-sm sm:text-base font-extrabold text-white leading-tight drop-shadow-lg line-clamp-2">
-              {title}
-            </h3>
-          </div>
+          {/* Clean thumbnail — no overlays */}
         </Link>
 
         {/* Course Info */}
         <div className="p-5 flex flex-col gap-2">
+          {/* Course Title */}
+          <h3 className="text-sm font-extrabold text-slate-900 dark:text-white leading-tight line-clamp-2">
+            {title}
+          </h3>
+
           {/* Short description */}
           <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed line-clamp-2">
             {shortDescription}
