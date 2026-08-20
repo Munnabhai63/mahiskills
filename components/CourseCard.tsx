@@ -61,7 +61,12 @@ export default function CourseCard({
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
             />
           )}
-          {/* Clean thumbnail — no overlays */}
+          {/* Discount Badge */}
+          {discount && discount > 0 && (
+            <span className="absolute top-3 right-3 px-2 py-1 rounded-lg bg-red-500 text-white font-black text-[10px] uppercase shadow-lg z-10">
+              {discount}% OFF
+            </span>
+          )}
         </Link>
 
         {/* Course Info */}
@@ -70,11 +75,6 @@ export default function CourseCard({
           <h3 className="text-sm font-extrabold text-slate-900 dark:text-white leading-tight line-clamp-2">
             {title}
           </h3>
-
-          {/* Short description */}
-          <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed line-clamp-2">
-            {shortDescription}
-          </p>
 
           {/* Star Rating & Reviews */}
           <div className="flex items-center gap-1.5 text-xs text-slate-700 dark:text-slate-300 font-semibold pt-1">
