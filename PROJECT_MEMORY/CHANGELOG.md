@@ -1,9 +1,10 @@
 # MAHI SKILLS — Project Changelog
 
-## [2026-08-20] — Profile Logo Restored to Exact Original Circular / Round Format
+## [2026-08-20] — Public Login Page Security & Cleanup
 
 ### Added & Updated:
-1. **Circular / Round Profile Logo Restored**:
-   - Integrated the new uploaded PNG photo into the **exact original circular / round profile logo container** with the Champagne Gold halo ring.
-   - Preserved identical original size, position, and layout across **Hero Section (`app/page.tsx`)**, **About Page (`app/about/page.tsx`)**, **1:1 Session Booking (`app/session/page.tsx`)**, and **Course Details (`app/courses/[slug]/page.tsx`)**.
-   - Zero modifications made to any other layout, text, color, or functionality.
+1. **Credentials Box Removed**:
+   - Completely deleted demo credentials box from `app/login/page.tsx`.
+   - Now the login page is 100% clean, professional, and secure with zero credentials shown to visitors.
+2. **Pushed to GitHub**:
+   - Commit `3f07c46` pushed to `https://github.com/Munnabhai63/mahiskills.git`.
