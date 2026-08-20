@@ -25,31 +25,38 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: route === '' ? 1.0 : 0.8,
   }));
 
-  // Dynamic course routes
-  const courses = await prisma.course.findMany({
-    where: { published: true },
-    select: { slug: true, updatedAt: true },
-  });
+  let courseRoutes: MetadataRoute.Sitemap = [];
+  let blogRoutes: MetadataRoute.Sitemap = [];
 
-  const courseRoutes = courses.map((c) => ({
-    url: `${baseUrl}/courses/${c.slug}`,
-    lastModified: c.updatedAt,
-    changeFrequency: 'weekly' as const,
-    priority: 0.9,
-  }));
+  try {
+    // Dynamic course routes
+    const courses = await prisma.course.findMany({
+      where: { published: true },
+      select: { slug: true, updatedAt: true },
+    });
 
-  // Dynamic blog routes
-  const posts = await prisma.blogPost.findMany({
-    where: { isPublished: true },
-    select: { slug: true, updatedAt: true },
-  });
+    courseRoutes = courses.map((c) => ({
+      url: `${baseUrl}/courses/${c.slug}`,
+      lastModified: c.updatedAt,
+      changeFrequency: 'weekly' as const,
+      priority: 0.9,
+    }));
 
-  const blogRoutes = posts.map((p) => ({
-    url: `${baseUrl}/blog/${p.slug}`,
-    lastModified: p.updatedAt,
-    changeFrequency: 'monthly' as const,
-    priority: 0.7,
-  }));
+    // Dynamic blog routes
+    const posts = await prisma.blogPost.findMany({
+      where: { isPublished: true },
+      select: { slug: true, updatedAt: true },
+    });
+
+    blogRoutes = posts.map((p) => ({
+      url: `${baseUrl}/blog/${p.slug}`,
+      lastModified: p.updatedAt,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    }));
+  } catch (error) {
+    console.warn('Sitemap dynamic routes fallback triggered during build:', error);
+  }
 
   return [...routes, ...courseRoutes, ...blogRoutes];
 }
