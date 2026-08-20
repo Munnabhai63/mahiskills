@@ -98,6 +98,7 @@ export default function AdminOrdersPage() {
                   <td className="p-4">
                     <p className="font-bold text-slate-900 dark:text-white">{ord.user?.name}</p>
                     <p className="text-[11px] text-slate-400">{ord.user?.email}</p>
+                    {ord.user?.phone && <p className="text-[10px] text-[#C49339] dark:text-[#F0C96A] font-semibold">{ord.user.phone}</p>}
                   </td>
 
                   <td className="p-4 font-medium text-slate-800 dark:text-slate-200">
@@ -108,7 +109,14 @@ export default function AdminOrdersPage() {
                     ₹{ord.amount.toLocaleString('en-IN')}
                   </td>
 
-                  <td className="p-4 text-slate-600 dark:text-slate-300">{ord.paymentMethod || 'ONLINE'}</td>
+                  <td className="p-4">
+                    <span className="font-bold text-slate-900 dark:text-white block text-[11px]">{ord.paymentMethod || 'PHONEPE_UPI_QR'}</span>
+                    {ord.razorpayPaymentId && (
+                      <span className="font-mono text-[10px] text-slate-500 dark:text-slate-400 block truncate max-w-[140px]" title={ord.razorpayPaymentId}>
+                        {ord.razorpayPaymentId}
+                      </span>
+                    )}
+                  </td>
 
                   <td className="p-4">
                     <span

@@ -18,6 +18,8 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
+import UpiPaymentModal from '@/components/UpiPaymentModal';
+
 export default function SessionBookingPage() {
   const router = useRouter();
   const { user } = useAuth();
@@ -34,10 +36,14 @@ export default function SessionBookingPage() {
   const [topic, setTopic] = useState('');
   const [notes, setNotes] = useState('');
 
-  // Booking Flow
+  // Booking Flow & UPI Modal State
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState<any>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const [upiModalOpen, setUpiModalOpen] = useState(false);
+  const [tempOrderId, setTempOrderId] = useState('');
+  const [tempOrderNumber, setTempOrderNumber] = useState('');
 
   useEffect(() => {
     if (user) {
@@ -100,8 +106,16 @@ export default function SessionBookingPage() {
       return;
     }
 
-    setIsSubmitting(true);
     setErrorMessage(null);
+    const genOrderNumber = `ORD-SES-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
+    setTempOrderId(`temp_ses_${Date.now()}`);
+    setTempOrderNumber(genOrderNumber);
+    setUpiModalOpen(true);
+  };
+
+  const handlePaymentSuccess = async (utr: string) => {
+    setUpiModalOpen(false);
+    setIsSubmitting(true);
 
     try {
       const res = await fetch('/api/session/book', {
@@ -115,7 +129,7 @@ export default function SessionBookingPage() {
           studentEmail,
           studentPhone,
           topic,
-          notes,
+          notes: notes ? `${notes} (UPI UTR: ${utr})` : `UPI UTR: ${utr}`,
         }),
       });
 
@@ -124,10 +138,10 @@ export default function SessionBookingPage() {
       if (res.ok && data.success) {
         setBookingSuccess(data.booking);
       } else {
-        setErrorMessage(data.error || 'Failed to complete booking. Please try again.');
+        setErrorMessage(data.error || 'Failed to complete booking.');
       }
     } catch {
-      setErrorMessage('An unexpected error occurred during booking. Please try again.');
+      setErrorMessage('An unexpected error occurred during booking.');
     } finally {
       setIsSubmitting(false);
     }
@@ -429,6 +443,18 @@ export default function SessionBookingPage() {
           </form>
         </div>
       </div>
+
+      {/* Official UPI Payment Modal for 1:1 Session */}
+      <UpiPaymentModal
+        isOpen={upiModalOpen}
+        onClose={() => setUpiModalOpen(false)}
+        orderId={tempOrderId}
+        orderNumber={tempOrderNumber}
+        amount={899}
+        itemTitle={`1:1 Mentorship Session with Munna Bhai (${selectedDate} @ ${selectedSlot})`}
+        itemType="SESSION"
+        onPaymentSuccess={handlePaymentSuccess}
+      />
     </div>
   );
 }

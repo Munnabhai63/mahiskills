@@ -7,6 +7,8 @@ import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { X, Trash2, Tag, ArrowRight, ShieldCheck, CheckCircle2, AlertCircle } from 'lucide-react';
 
+import UpiPaymentModal from '@/components/UpiPaymentModal';
+
 export default function CartDrawer() {
   const {
     items,
@@ -29,7 +31,22 @@ export default function CartDrawer() {
   const [couponMessage, setCouponMessage] = useState<{ text: string; isError: boolean } | null>(null);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
 
-  if (!isOpen) return null;
+  // UPI Payment Modal State
+  const [upiModalData, setUpiModalData] = useState<{
+    isOpen: boolean;
+    orderId: string;
+    orderNumber: string;
+    amount: number;
+    itemTitle: string;
+  }>({
+    isOpen: false,
+    orderId: '',
+    orderNumber: '',
+    amount: 0,
+    itemTitle: '',
+  });
+
+  if (!isOpen && !upiModalData.isOpen) return null;
 
   const handleApplyCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,30 +96,30 @@ export default function CartDrawer() {
         return;
       }
 
-      const verifyRes = await fetch('/api/checkout/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          orderId: data.orderId,
-          razorpayOrderId: data.razorpayOrderId,
-          razorpayPaymentId: `pay_${Date.now()}`,
-          razorpaySignature: 'simulated_sig_success',
-        }),
+      // Open UPI QR Payment Modal
+      setUpiModalData({
+        isOpen: true,
+        orderId: data.orderId,
+        orderNumber: data.orderNumber,
+        amount: data.amount,
+        itemTitle: targetItem.title,
       });
-
-      const verifyData = await verifyRes.json();
-
-      if (verifyRes.ok) {
-        clearCart();
-        setIsOpen(false);
-        router.push(verifyData.redirectUrl || '/dashboard');
-      } else {
-        alert(verifyData.error || 'Payment verification failed');
-      }
     } catch {
       alert('Checkout error occurred. Please try again.');
     } finally {
       setIsCheckingOut(false);
+    }
+  };
+
+  const handlePaymentSuccess = () => {
+    const targetItem = items[0];
+    clearCart();
+    setUpiModalData((prev) => ({ ...prev, isOpen: false }));
+    setIsOpen(false);
+    if (targetItem?.slug) {
+      router.push(`/learn/${targetItem.slug}`);
+    } else {
+      router.push('/dashboard');
     }
   };
 
@@ -288,6 +305,18 @@ export default function CartDrawer() {
           )}
         </div>
       </div>
+
+      {/* Official UPI Payment Modal */}
+      <UpiPaymentModal
+        isOpen={upiModalData.isOpen}
+        onClose={() => setUpiModalData((prev) => ({ ...prev, isOpen: false }))}
+        orderId={upiModalData.orderId}
+        orderNumber={upiModalData.orderNumber}
+        amount={upiModalData.amount}
+        itemTitle={upiModalData.itemTitle}
+        itemType="COURSE"
+        onPaymentSuccess={handlePaymentSuccess}
+      />
     </div>
   );
 }

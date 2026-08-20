@@ -21,6 +21,7 @@ import {
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import VideoModal from '@/components/VideoModal';
+import UpiPaymentModal from '@/components/UpiPaymentModal';
 
 export default function CourseDetailPage() {
   const params = useParams();
@@ -36,6 +37,19 @@ export default function CourseDetailPage() {
   const [selectedPreviewVideo, setSelectedPreviewVideo] = useState<string>('');
   const [openModuleIndex, setOpenModuleIndex] = useState<number | null>(0);
   const [isBuying, setIsBuying] = useState(false);
+
+  // UPI Payment Modal State
+  const [upiModalData, setUpiModalData] = useState<{
+    isOpen: boolean;
+    orderId: string;
+    orderNumber: string;
+    amount: number;
+  }>({
+    isOpen: false,
+    orderId: '',
+    orderNumber: '',
+    amount: 0,
+  });
 
   useEffect(() => {
     if (!slug) return;
@@ -100,29 +114,22 @@ export default function CourseDetailPage() {
         return;
       }
 
-      const verifyRes = await fetch('/api/checkout/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          orderId: data.orderId,
-          razorpayOrderId: data.razorpayOrderId,
-          razorpayPaymentId: `pay_${Date.now()}`,
-          razorpaySignature: 'simulated_sig_success',
-        }),
+      setUpiModalData({
+        isOpen: true,
+        orderId: data.orderId,
+        orderNumber: data.orderNumber,
+        amount: data.amount,
       });
-
-      const verifyData = await verifyRes.json();
-
-      if (verifyRes.ok) {
-        router.push(`/learn/${slug}`);
-      } else {
-        alert(verifyData.error || 'Payment verification failed');
-      }
     } catch {
       alert('An error occurred during checkout. Please try again.');
     } finally {
       setIsBuying(false);
     }
+  };
+
+  const handlePaymentSuccess = () => {
+    setUpiModalData((prev) => ({ ...prev, isOpen: false }));
+    router.push(`/learn/${slug}`);
   };
 
   const handleAddToCart = () => {
@@ -427,6 +434,18 @@ export default function CourseDetailPage() {
         onClose={() => setVideoModalOpen(false)}
         videoUrl={selectedPreviewVideo || course.previewVideo || 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'}
         title={`${course.title} • Free Preview`}
+      />
+
+      {/* Official UPI Payment Modal */}
+      <UpiPaymentModal
+        isOpen={upiModalData.isOpen}
+        onClose={() => setUpiModalData((prev) => ({ ...prev, isOpen: false }))}
+        orderId={upiModalData.orderId}
+        orderNumber={upiModalData.orderNumber}
+        amount={upiModalData.amount}
+        itemTitle={course.title}
+        itemType="COURSE"
+        onPaymentSuccess={handlePaymentSuccess}
       />
     </div>
   );
