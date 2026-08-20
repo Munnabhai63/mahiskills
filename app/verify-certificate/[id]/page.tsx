@@ -15,6 +15,7 @@ import {
   Printer,
   Sparkles,
 } from 'lucide-react';
+import FounderSignature from '@/components/FounderSignature';
 
 export default function VerifyCertificatePage() {
   const params = useParams();
@@ -203,12 +204,12 @@ export default function VerifyCertificatePage() {
             {/* Right: Signature & QR Code */}
             <div className="flex items-center justify-center sm:justify-end gap-4">
               <div className="text-center sm:text-right space-y-0.5">
-                <div className="font-serif italic text-2xl text-slate-900 font-black tracking-wide">
-                  Munna Bhai
+                <div className="flex justify-center sm:justify-end">
+                  <FounderSignature className="h-12 w-36 sm:h-14 sm:w-44 text-[#07111F]" />
                 </div>
-                <div className="w-28 h-0.5 bg-slate-400 mx-auto sm:ml-auto" />
-                <p className="text-[11px] font-bold text-slate-800">Munna Bhai</p>
-                <p className="text-[9px] text-slate-500 uppercase tracking-wider font-semibold">
+                <div className="w-32 h-0.5 bg-gradient-to-r from-transparent via-slate-400 to-slate-600 mx-auto sm:ml-auto" />
+                <p className="text-[11px] font-black text-slate-900 tracking-wide">Munna Bhai</p>
+                <p className="text-[9px] text-[#8C6219] uppercase tracking-wider font-extrabold">
                   Founder & Lead Mentor
                 </p>
               </div>
