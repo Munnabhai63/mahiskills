@@ -102,12 +102,6 @@ function LoginForm() {
         </button>
       </form>
 
-      {/* Quick Demo Credentials Help */}
-      <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-white/5 space-y-1 text-xs text-slate-600 dark:text-slate-300">
-        <p className="font-bold text-slate-900 dark:text-white">Admin Credentials:</p>
-        <p>• Email: <span className="font-bold text-[#C49339] dark:text-[#F0C96A]">munachoudhary246@gmail.com</span></p>
-        <p>• Password: <span className="font-bold text-slate-900 dark:text-white">Munabhai@6375</span></p>
-      </div>
 
       <div className="text-center text-xs text-slate-500 dark:text-slate-400 pt-2 border-t border-slate-100 dark:border-white/10">
         Don&apos;t have an account?{' '}
