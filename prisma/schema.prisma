@@ -1,0 +1,289 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(uuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  role         String    @default("STUDENT") // STUDENT or ADMIN
+  phone        String?
+  avatar       String?
+  bio          String?
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  enrollments     Enrollment[]
+  lessonProgress  LessonProgress[]
+  orders          Order[]
+  sessionBookings SessionBooking[]
+  reviews         Review[]
+  certificates    Certificate[]
+}
+
+model Course {
+  id               String   @id @default(uuid())
+  title            String
+  slug             String   @unique
+  shortDescription String
+  description      String
+  price            Float
+  originalPrice    Float?
+  discount         Float?
+  thumbnail        String
+  previewVideo     String?
+  level            String   @default("All Levels") // Beginner, Intermediate, Advanced, All Levels
+  category         String   @default("Growth & Marketing")
+  badge            String?  // Bestseller, New, Popular
+  published        Boolean  @default(true)
+  instructor       String   @default("Munna Bhai")
+  instructorTitle  String   @default("Founder & Lead Mentor, Mahi Skills")
+  instructorAvatar String?
+  duration         String   @default("10+ Hours")
+  rating           Float    @default(4.9)
+  totalStudents    Int      @default(0)
+  requirements     String   @default("[]") // JSON string array
+  learningOutcomes String   @default("[]") // JSON string array
+  faqs             String   @default("[]") // JSON string array of {q, a}
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  modules      CourseModule[]
+  enrollments  Enrollment[]
+  orders       Order[]
+  reviews      Review[]
+  certificates Certificate[]
+}
+
+model CourseModule {
+  id        String   @id @default(uuid())
+  courseId  String
+  title     String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  course  Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons Lesson[]
+}
+
+model Lesson {
+  id          String   @id @default(uuid())
+  moduleId    String
+  title       String
+  description String?
+  videoUrl    String
+  duration    String   @default("15m")
+  isPreview   Boolean  @default(false)
+  order       Int      @default(0)
+  resources   String   @default("[]") // JSON array of {title, url, type}
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  module         CourseModule     @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  lessonProgress LessonProgress[]
+}
+
+model Enrollment {
+  id              String    @id @default(uuid())
+  userId          String
+  courseId        String
+  enrolledAt      DateTime  @default(now())
+  completedAt     DateTime?
+  progressPercent Float     @default(0.0)
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+}
+
+model LessonProgress {
+  id          String    @id @default(uuid())
+  userId      String
+  lessonId    String
+  isCompleted Boolean   @default(false)
+  completedAt DateTime?
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+}
+
+model Order {
+  id                String   @id @default(uuid())
+  orderNumber       String   @unique
+  userId            String
+  courseId          String?
+  sessionId         String?
+  itemType          String   @default("COURSE") // COURSE or SESSION
+  amount            Float
+  originalAmount    Float
+  discountAmount    Float    @default(0)
+  couponCode        String?
+  currency          String   @default("INR")
+  status            String   @default("PENDING") // PENDING, PAID, FAILED, REFUNDED
+  paymentMethod     String?  // UPI, CARD, NETBANKING, WALLET, SIMULATED
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course   Course?   @relation(fields: [courseId], references: [id])
+  payments Payment[]
+}
+
+model Payment {
+  id            String   @id @default(uuid())
+  orderId       String
+  gateway       String   @default("RAZORPAY")
+  transactionId String   @unique
+  signature     String?
+  status        String   @default("SUCCESS") // SUCCESS, FAILED, REFUNDED
+  payload       String?  // JSON string
+  createdAt     DateTime @default(now())
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model Coupon {
+  id            String    @id @default(uuid())
+  code          String    @unique
+  discountType  String    @default("PERCENTAGE") // PERCENTAGE or FIXED
+  discountValue Float
+  minPurchase   Float     @default(0)
+  maxDiscount   Float?
+  usageLimit    Int?
+  usedCount     Int       @default(0)
+  expiresAt     DateTime?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+}
+
+model SessionAvailability {
+  id                  String  @id @default(uuid())
+  dayOfWeek           Int     // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+  startTime           String  // "10:00"
+  endTime             String  // "18:00"
+  slotDurationMinutes Int     @default(60)
+  isActive            Boolean @default(true)
+}
+
+model SessionSlot {
+  id              String   @id @default(uuid())
+  date            String   // "YYYY-MM-DD"
+  startTime       String   // "11:00 AM"
+  endTime         String   // "12:00 PM"
+  isBooked        Boolean  @default(false)
+  maxBookings     Int      @default(1)
+  currentBookings Int      @default(0)
+  createdAt       DateTime @default(now())
+}
+
+model SessionBooking {
+  id                String   @id @default(uuid())
+  bookingNumber     String   @unique
+  userId            String
+  studentName       String
+  studentEmail      String
+  studentPhone      String
+  bookingDate       String   // "YYYY-MM-DD"
+  startTime         String   // "11:00 AM"
+  endTime           String   // "12:00 PM"
+  topic             String
+  notes             String?
+  status            String   @default("CONFIRMED") // CONFIRMED, COMPLETED, CANCELLED, RESCHEDULED
+  meetingLink       String?  @default("https://meet.google.com/mahiskills-mentor")
+  amount            Float    @default(899.0)
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model BlockedDate {
+  id        String   @id @default(uuid())
+  date      String   @unique // "YYYY-MM-DD"
+  reason    String?
+  createdAt DateTime @default(now())
+}
+
+model Review {
+  id         String   @id @default(uuid())
+  userId     String
+  courseId   String
+  rating     Int      @default(5)
+  comment    String
+  isApproved Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+}
+
+model Certificate {
+  id                String   @id @default(uuid())
+  certificateNumber String   @unique
+  userId            String
+  courseId          String
+  studentName       String
+  courseName        String
+  instructorName    String   @default("Munna Bhai")
+  issueDate         DateTime @default(now())
+  verificationUrl   String
+  createdAt         DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+}
+
+model BlogPost {
+  id             String    @id @default(uuid())
+  title          String
+  slug           String    @unique
+  excerpt        String
+  content        String
+  coverImage     String
+  author         String    @default("Munna Bhai")
+  category       String    @default("Growth Strategy")
+  tags           String    @default("[]") // JSON string array
+  readTime       String    @default("5 min read")
+  isPublished    Boolean   @default(true)
+  publishedAt    DateTime  @default(now())
+  seoTitle       String?
+  seoDescription String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model ContactMessage {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  phone     String?
+  subject   String
+  message   String
+  isRead    Boolean  @default(false)
+  replied   Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model SiteSetting {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String
+  group     String   @default("general") // general, hero, stats, founder, social, session
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
