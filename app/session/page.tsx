@@ -311,7 +311,7 @@ export default function SessionBookingPage() {
               Step 1: Choose Date & Time Slot
             </h3>
 
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Select Date</label>
                 <input
@@ -325,39 +325,28 @@ export default function SessionBookingPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">
-                  Select Time Slot ({availableSlots.length} Available)
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Available Slots ({availableSlots.length})
                 </label>
                 {loadingSlots ? (
-                  <div className="py-3 text-xs text-slate-400">Loading available slots...</div>
+                  <div className="py-2.5 text-xs text-slate-400">Loading slots...</div>
                 ) : availableSlots.length === 0 ? (
-                  <div className="py-3 text-xs text-rose-500 font-semibold">
-                    No slots available on this date. Please pick another date.
+                  <div className="py-2.5 text-xs text-rose-500 font-semibold">
+                    No slots available on this date.
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    {availableSlots.map((slot) => {
-                      const isSelected = selectedSlot === slot;
-                      return (
-                        <button
-                          key={slot}
-                          type="button"
-                          onClick={() => setSelectedSlot(slot)}
-                          className={`p-3 rounded-xl text-xs font-bold text-left transition-all border flex items-center justify-between ${
-                            isSelected
-                              ? 'bg-[#D6A84F] text-slate-950 border-[#D6A84F] shadow-md'
-                              : 'bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-white/10 hover:border-[#D6A84F]/50'
-                          }`}
-                        >
-                          <div className="flex items-center gap-2">
-                            <Clock className={`w-3.5 h-3.5 ${isSelected ? 'text-slate-950' : 'text-[#D6A84F]'}`} />
-                            <span>{slot}</span>
-                          </div>
-                          {isSelected && <CheckCircle2 className="w-4 h-4 text-slate-950 shrink-0" />}
-                        </button>
-                      );
-                    })}
-                  </div>
+                  <select
+                    value={selectedSlot}
+                    onChange={(e) => setSelectedSlot(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/10 text-xs text-slate-900 dark:text-white focus:border-[#D6A84F] focus:outline-none font-bold cursor-pointer"
+                    required
+                  >
+                    {availableSlots.map((slot) => (
+                      <option key={slot} value={slot}>
+                        {slot} (1 Hour)
+                      </option>
+                    ))}
+                  </select>
                 )}
               </div>
             </div>
