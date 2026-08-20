@@ -85,35 +85,26 @@ export default function CourseCard({
         </div>
       </div>
 
-      {/* Premium Footer Price & CTA */}
-      <div className="p-4 pt-3 mx-3 mb-3 rounded-2xl bg-gradient-to-r from-[#0B1728] to-[#112240] dark:from-[#07111F] dark:to-[#0D1B2A] border border-[#D6A84F]/20">
-        <div className="flex items-center justify-between">
-          <div className="space-y-0.5">
-            <div className="flex items-baseline gap-2">
-              <span className="text-xl font-black text-white tracking-tight">
-                ₹{price.toLocaleString('en-IN')}
-              </span>
-              {originalPrice && (
-                <span className="text-[11px] text-slate-400 line-through font-medium">
-                  ₹{originalPrice.toLocaleString('en-IN')}
-                </span>
-              )}
-            </div>
-            {originalPrice && originalPrice > price && (
-              <p className="text-[10px] font-bold text-emerald-400">
-                You save ₹{(originalPrice - price).toLocaleString('en-IN')}
-              </p>
-            )}
-          </div>
-
-          <Link
-            href={`/courses/${slug}`}
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#D6A84F] to-[#C49339] hover:from-[#F0C96A] hover:to-[#D6A84F] text-[#05080D] font-black text-xs transition-all shadow-md shadow-[#D6A84F]/25 hover:shadow-lg hover:shadow-[#D6A84F]/40 group/btn"
-          >
-            <span>Enroll Now</span>
-            <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform" />
-          </Link>
+      {/* Clean Premium Pricing */}
+      <div className="px-5 pb-5 pt-3 border-t border-slate-100 dark:border-white/5 mt-auto flex items-center justify-between">
+        <div className="flex items-baseline gap-1.5">
+          <span className="text-base font-extrabold text-[#C49339] dark:text-[#F0C96A]">
+            ₹{price.toLocaleString('en-IN')}
+          </span>
+          {originalPrice && (
+            <span className="text-[11px] text-slate-400 line-through">
+              ₹{originalPrice.toLocaleString('en-IN')}
+            </span>
+          )}
         </div>
+
+        <Link
+          href={`/courses/${slug}`}
+          className="inline-flex items-center gap-1 px-4 py-2 rounded-xl bg-gradient-to-r from-[#D6A84F] to-[#C49339] text-[#05080D] font-bold text-[11px] transition-all hover:shadow-md hover:shadow-[#D6A84F]/30 group/btn"
+        >
+          <span>Enroll Now</span>
+          <ArrowRight className="w-3 h-3 group-hover/btn:translate-x-0.5 transition-transform" />
+        </Link>
       </div>
     </div>
   );
