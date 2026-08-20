@@ -18,35 +18,20 @@ export async function GET(req: NextRequest) {
     if (isBlocked) {
       return NextResponse.json({
         available: false,
-        reason: isBlocked.reason || 'This date is not available for bookings',
+        reason: isBlocked.reason || 'This date is not available for mentorship bookings',
         slots: [],
+        availableSlots: [],
       });
     }
 
-    const selectedDate = new Date(dateStr);
-    const dayOfWeek = selectedDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
-
-    // Fetch availability rules for this day
-    const availability = await prisma.sessionAvailability.findFirst({
-      where: { dayOfWeek, isActive: true },
-    });
-
-    if (!availability) {
-      return NextResponse.json({
-        available: false,
-        reason: 'Mentorship is not scheduled on this day of the week',
-        slots: [],
-      });
-    }
-
-    // Standard available hourly slots
+    // Standard available hourly slots across the day
     const standardSlots = [
-      { startTime: '11:00 AM', endTime: '12:00 PM' },
-      { startTime: '12:30 PM', endTime: '01:30 PM' },
-      { startTime: '03:00 PM', endTime: '04:00 PM' },
-      { startTime: '04:30 PM', endTime: '05:30 PM' },
-      { startTime: '06:00 PM', endTime: '07:00 PM' },
-      { startTime: '07:30 PM', endTime: '08:30 PM' },
+      { startTime: '11:00 AM', endTime: '12:00 PM', label: '11:00 AM - 12:00 PM' },
+      { startTime: '12:30 PM', endTime: '01:30 PM', label: '12:30 PM - 01:30 PM' },
+      { startTime: '03:00 PM', endTime: '04:00 PM', label: '03:00 PM - 04:00 PM' },
+      { startTime: '04:30 PM', endTime: '05:30 PM', label: '04:30 PM - 05:30 PM' },
+      { startTime: '06:00 PM', endTime: '07:00 PM', label: '06:00 PM - 07:00 PM' },
+      { startTime: '07:30 PM', endTime: '08:30 PM', label: '07:30 PM - 08:30 PM' },
     ];
 
     // Fetch existing confirmed bookings for this date to prevent double-booking
@@ -62,13 +47,18 @@ export async function GET(req: NextRequest) {
 
     const slots = standardSlots.map((slot) => ({
       ...slot,
-      isAvailable: !bookedTimes.has(slot.startTime),
+      isAvailable: !bookedTimes.has(slot.startTime) && !bookedTimes.has(slot.label),
     }));
+
+    const availableSlots = slots
+      .filter((s) => s.isAvailable)
+      .map((s) => s.label);
 
     return NextResponse.json({
       available: true,
       date: dateStr,
       slots,
+      availableSlots,
     });
   } catch (error) {
     console.error('Available slots error:', error);

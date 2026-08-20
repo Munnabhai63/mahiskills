@@ -37,6 +37,7 @@ export default function SessionBookingPage() {
   // Booking Flow
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState<any>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -47,37 +48,60 @@ export default function SessionBookingPage() {
   }, [user]);
 
   useEffect(() => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const dateStr = tomorrow.toISOString().split('T')[0];
-    setSelectedDate(dateStr);
+    // Default to tomorrow's date
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    setSelectedDate(`${yyyy}-${mm}-${dd}`);
   }, []);
 
   useEffect(() => {
     if (!selectedDate) return;
     setLoadingSlots(true);
+    setErrorMessage(null);
     fetch(`/api/session/available-slots?date=${selectedDate}`)
       .then((res) => res.json())
       .then((data) => {
-        setAvailableSlots(data.availableSlots || []);
-        if (data.availableSlots?.length > 0) {
-          setSelectedSlot(data.availableSlots[0]);
+        const slots: string[] = data.availableSlots || [];
+        setAvailableSlots(slots);
+        if (slots.length > 0) {
+          setSelectedSlot(slots[0]);
         } else {
           setSelectedSlot('');
         }
       })
-      .catch(() => setAvailableSlots([]))
+      .catch(() => {
+        // Fallback default slots
+        const defaultSlots = [
+          '11:00 AM - 12:00 PM',
+          '12:30 PM - 01:30 PM',
+          '03:00 PM - 04:00 PM',
+          '04:30 PM - 05:30 PM',
+          '06:00 PM - 07:00 PM',
+          '07:30 PM - 08:30 PM',
+        ];
+        setAvailableSlots(defaultSlots);
+        setSelectedSlot(defaultSlots[0]);
+      })
       .finally(() => setLoadingSlots(false));
   }, [selectedDate]);
 
   const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedDate || !selectedSlot) {
-      alert('Please select a date and time slot');
+      setErrorMessage('Please select a date and time slot.');
+      return;
+    }
+
+    if (!studentName || !studentEmail || !studentPhone || !topic) {
+      setErrorMessage('Please fill in all required fields (Name, Email, WhatsApp, and Topic).');
       return;
     }
 
     setIsSubmitting(true);
+    setErrorMessage(null);
 
     try {
       const res = await fetch('/api/session/book', {
@@ -97,22 +121,25 @@ export default function SessionBookingPage() {
 
       const data = await res.json();
 
-      if (res.ok) {
+      if (res.ok && data.success) {
         setBookingSuccess(data.booking);
       } else {
-        alert(data.error || 'Failed to complete booking');
+        setErrorMessage(data.error || 'Failed to complete booking. Please try again.');
       }
     } catch {
-      alert('Error during session booking');
+      setErrorMessage('An unexpected error occurred during booking. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const calculateEndTime = (start: string) => {
+    if (start.includes(' - ')) {
+      return start.split(' - ')[1];
+    }
     const parts = start.split(':');
     let hour = parseInt(parts[0]);
-    const rest = parts[1];
+    const rest = parts[1] || '00';
     hour = hour === 12 ? 1 : hour + 1;
     return `${hour.toString().padStart(2, '0')}:${rest}`;
   };
@@ -125,12 +152,13 @@ export default function SessionBookingPage() {
         </div>
 
         <div className="space-y-2">
-          <span className="text-xs font-bold text-[#C49339] dark:text-[#F0C96A] uppercase tracking-wider">
-            BOOKING CONFIRMED
-          </span>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-700 text-xs font-bold text-emerald-800 dark:text-emerald-300">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>1:1 SESSION CONFIRMED</span>
+          </div>
           <h1 className="text-3xl font-black text-slate-950 dark:text-white">Your 1:1 Session is Locked!</h1>
           <p className="text-sm text-slate-600 dark:text-slate-300">
-            Booking ID: <strong className="text-slate-900 dark:text-white">{bookingSuccess.bookingNumber}</strong>
+            Booking ID: <strong className="text-slate-900 dark:text-white font-mono">{bookingSuccess.bookingNumber}</strong>
           </p>
         </div>
 
@@ -141,40 +169,55 @@ export default function SessionBookingPage() {
               <strong className="text-slate-900 dark:text-white">{bookingSuccess.bookingDate}</strong>
             </div>
             <div>
-              <span className="text-slate-400 block text-xs">Time</span>
-              <strong className="text-slate-900 dark:text-white">
-                {bookingSuccess.startTime} - {bookingSuccess.endTime}
-              </strong>
+              <span className="text-slate-400 block text-xs">Time Slot</span>
+              <strong className="text-slate-900 dark:text-white">{bookingSuccess.startTime}</strong>
             </div>
-            <div className="col-span-2">
-              <span className="text-slate-400 block text-xs">Discussion Topic</span>
-              <strong className="text-slate-900 dark:text-white">{bookingSuccess.topic}</strong>
+            <div>
+              <span className="text-slate-400 block text-xs">Student</span>
+              <strong className="text-slate-900 dark:text-white">{bookingSuccess.studentName}</strong>
+            </div>
+            <div>
+              <span className="text-slate-400 block text-xs">WhatsApp</span>
+              <strong className="text-slate-900 dark:text-white">{bookingSuccess.studentPhone}</strong>
             </div>
           </div>
 
-          <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/5 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-800 dark:text-slate-200 font-bold">
-              <Video className="w-4 h-4 text-[#D6A84F]" />
-              <span>Google Meet Link</span>
+          <div className="pt-3 border-t border-slate-100 dark:border-white/10">
+            <span className="text-slate-400 block text-xs mb-1">Topic</span>
+            <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 font-medium">{bookingSuccess.topic}</p>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-[#D6A84F]/10 border border-[#D6A84F]/30 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Video className="w-5 h-5 text-[#D6A84F]" />
+              <div>
+                <strong className="text-xs sm:text-sm text-slate-900 dark:text-white block">Google Meet Link</strong>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400">Meeting link will also be sent to WhatsApp & Email</span>
+              </div>
             </div>
             <a
               href={bookingSuccess.meetingLink || 'https://meet.google.com/mahiskills-mentor'}
               target="_blank"
-              rel="noreferrer"
-              className="px-4 py-1.5 rounded-lg bg-gradient-to-r from-[#D6A84F] to-[#C49339] text-white text-xs font-bold shadow-xs hover:scale-105 transition-transform"
+              rel="noopener noreferrer"
+              className="px-3.5 py-1.5 rounded-lg bg-[#D6A84F] text-slate-950 font-bold text-xs hover:bg-[#C49339] transition-colors"
             >
-              Join Call
+              Join Meet
             </a>
           </div>
         </div>
 
-        <div className="pt-2">
+        <div className="flex justify-center gap-3">
           <Link
             href="/dashboard"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-900 dark:bg-white/10 hover:bg-slate-800 dark:hover:bg-white/20 text-white font-bold text-sm"
+            className="px-6 py-3 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold text-xs hover:scale-105 transition-transform"
           >
-            <span>View In Student Dashboard</span>
-            <ArrowRight className="w-4 h-4" />
+            Go to Dashboard
+          </Link>
+          <Link
+            href="/"
+            className="px-6 py-3 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 font-bold text-xs hover:bg-slate-200 transition-colors"
+          >
+            Back to Home
           </Link>
         </div>
       </div>
@@ -182,21 +225,18 @@ export default function SessionBookingPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
       {/* Header */}
-      <div className="text-center max-w-3xl mx-auto space-y-3">
-        <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white dark:bg-[#0B1728] border border-[#D6A84F]/40 text-xs font-bold text-[#C49339] dark:text-[#F0C96A] shadow-xs">
-          <span>☆</span>
-          <span>1:1 PRIVATE STRATEGY CALL</span>
+      <div className="text-center space-y-3 max-w-3xl mx-auto">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white dark:bg-[#0B1728] border border-[#D6A84F]/40 text-xs font-bold text-[#C49339] dark:text-[#F0C96A] shadow-xs">
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>EXCLUSIVE 1-ON-1 STRATEGY CALL</span>
         </div>
-
-        <h1 className="text-3xl sm:text-5xl font-black text-slate-950 dark:text-white leading-tight">
-          Book a 1:1 Personal Mentorship Session <br />
-          <span className="text-[#C49339] dark:text-[#F0C96A]">With Munna Bhai</span>
+        <h1 className="text-3xl sm:text-5xl font-black text-slate-950 dark:text-white tracking-tight">
+          Book 1:1 Live Mentorship With Munna Bhai
         </h1>
-
         <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed">
-          Get personal guidance, analyze your channel/account, optimize your funnels, and build a tailored monetization plan.
+          Get personal guidance on Instagram organic growth, monetization funnels, high-ticket freelancing, and digital skill roadmaps tailored specifically to your goals.
         </p>
       </div>
 
@@ -261,11 +301,17 @@ export default function SessionBookingPage() {
             onSubmit={handleBooking}
             className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-[#0B1728] border border-slate-200 dark:border-white/10 shadow-lg space-y-6"
           >
+            {errorMessage && (
+              <div className="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs font-semibold">
+                {errorMessage}
+              </div>
+            )}
+
             <h3 className="text-lg font-bold text-slate-950 dark:text-white border-b border-slate-100 dark:border-white/10 pb-3">
               Step 1: Choose Date & Time Slot
             </h3>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Select Date</label>
                 <input
@@ -273,34 +319,45 @@ export default function SessionBookingPage() {
                   value={selectedDate}
                   min={new Date().toISOString().split('T')[0]}
                   onChange={(e) => setSelectedDate(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/10 text-xs text-slate-900 dark:text-white focus:border-[#D6A84F] focus:outline-none font-medium"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/10 text-xs text-slate-900 dark:text-white focus:border-[#D6A84F] focus:outline-none font-medium cursor-pointer"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Available Slots ({availableSlots.length})
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">
+                  Select Time Slot ({availableSlots.length} Available)
                 </label>
                 {loadingSlots ? (
-                  <div className="py-2.5 text-xs text-slate-400">Loading slots...</div>
+                  <div className="py-3 text-xs text-slate-400">Loading available slots...</div>
                 ) : availableSlots.length === 0 ? (
-                  <div className="py-2.5 text-xs text-rose-500 font-semibold">
-                    No slots available on this date.
+                  <div className="py-3 text-xs text-rose-500 font-semibold">
+                    No slots available on this date. Please pick another date.
                   </div>
                 ) : (
-                  <select
-                    value={selectedSlot}
-                    onChange={(e) => setSelectedSlot(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/10 text-xs text-slate-900 dark:text-white focus:border-[#D6A84F] focus:outline-none font-bold"
-                    required
-                  >
-                    {availableSlots.map((slot) => (
-                      <option key={slot} value={slot}>
-                        {slot} (1 Hour)
-                      </option>
-                    ))}
-                  </select>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {availableSlots.map((slot) => {
+                      const isSelected = selectedSlot === slot;
+                      return (
+                        <button
+                          key={slot}
+                          type="button"
+                          onClick={() => setSelectedSlot(slot)}
+                          className={`p-3 rounded-xl text-xs font-bold text-left transition-all border flex items-center justify-between ${
+                            isSelected
+                              ? 'bg-[#D6A84F] text-slate-950 border-[#D6A84F] shadow-md'
+                              : 'bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-white/10 hover:border-[#D6A84F]/50'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <Clock className={`w-3.5 h-3.5 ${isSelected ? 'text-slate-950' : 'text-[#D6A84F]'}`} />
+                            <span>{slot}</span>
+                          </div>
+                          {isSelected && <CheckCircle2 className="w-4 h-4 text-slate-950 shrink-0" />}
+                        </button>
+                      );
+                    })}
+                  </div>
                 )}
               </div>
             </div>
@@ -316,7 +373,7 @@ export default function SessionBookingPage() {
                   type="text"
                   value={studentName}
                   onChange={(e) => setStudentName(e.target.value)}
-                  placeholder="John Doe"
+                  placeholder="Mahipal Choudhary"
                   className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/10 text-xs text-slate-900 dark:text-white focus:border-[#D6A84F] focus:outline-none"
                   required
                 />
@@ -328,7 +385,7 @@ export default function SessionBookingPage() {
                   type="email"
                   value={studentEmail}
                   onChange={(e) => setStudentEmail(e.target.value)}
-                  placeholder="you@example.com"
+                  placeholder="bhupalkata@gmail.com"
                   className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/10 text-xs text-slate-900 dark:text-white focus:border-[#D6A84F] focus:outline-none"
                   required
                 />
@@ -342,7 +399,7 @@ export default function SessionBookingPage() {
                   type="tel"
                   value={studentPhone}
                   onChange={(e) => setStudentPhone(e.target.value)}
-                  placeholder="+91 98765 43210"
+                  placeholder="+91 93763 43629"
                   className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/10 text-xs text-slate-900 dark:text-white focus:border-[#D6A84F] focus:outline-none"
                   required
                 />
@@ -362,7 +419,7 @@ export default function SessionBookingPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Additional Questions or Notes</label>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Additional Questions or Notes (Optional)</label>
               <textarea
                 rows={3}
                 value={notes}
@@ -374,10 +431,11 @@ export default function SessionBookingPage() {
 
             <button
               type="submit"
-              disabled={isSubmitting || availableSlots.length === 0}
-              className="w-full py-4 rounded-xl bg-gradient-to-r from-[#D6A84F] to-[#C49339] hover:from-[#E0B45C] hover:to-[#D6A84F] text-white font-black text-sm flex items-center justify-center gap-2 shadow-lg shadow-[#D6A84F]/30 hover:scale-[1.01] transition-all disabled:opacity-50"
+              disabled={isSubmitting || !selectedSlot}
+              className="w-full py-4 rounded-xl bg-gradient-to-r from-[#D6A84F] to-[#C49339] hover:from-[#E0B45C] hover:to-[#D6A84F] text-white font-black text-sm flex items-center justify-center gap-2 shadow-lg shadow-[#D6A84F]/30 hover:scale-[1.01] transition-all disabled:opacity-50 cursor-pointer"
             >
               <span>{isSubmitting ? 'Confirming Booking...' : 'Proceed to Book (₹899) →'}</span>
+              <ArrowRight className="w-4 h-4" />
             </button>
           </form>
         </div>
