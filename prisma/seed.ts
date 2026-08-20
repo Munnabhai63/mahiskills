@@ -27,17 +27,17 @@ async function main() {
   await prisma.user.deleteMany();
 
   // 2. Users
-  const adminPasswordHash = await bcrypt.hash('Admin@123456', 10);
+  const adminPasswordHash = await bcrypt.hash('Munabhai@6375', 10);
   const studentPasswordHash = await bcrypt.hash('Student@123456', 10);
 
   const admin = await prisma.user.create({
     data: {
       name: 'Munna Bhai',
-      email: 'admin@mahiskills.in',
+      email: 'munachoudhary246@gmail.com',
       passwordHash: adminPasswordHash,
       role: 'ADMIN',
       phone: '+91 9376343629',
-      avatar: '/images/munna-bhai-founder.jpg',
+      avatar: '/images/munna-bhai-transparent.png',
       bio: 'Founder & Lead Mentor at Mahi Skills. Empowering 100,000+ creators and digital entrepreneurs across India to master practical income-generating skills.',
     },
   });

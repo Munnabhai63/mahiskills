@@ -22,10 +22,10 @@ async function runVerification() {
 
   // 1. DATABASE & USERS TEST
   console.log('1. Testing Database & Authentication:');
-  const admin = await prisma.user.findUnique({ where: { email: 'admin@mahiskills.in' } });
+  const admin = await prisma.user.findUnique({ where: { email: 'munachoudhary246@gmail.com' } });
   assert(admin !== null && admin.role === 'ADMIN', 'Admin user exists with role ADMIN');
 
-  const isPasswordCorrect = await verifyPassword('Admin@123456', admin!.passwordHash);
+  const isPasswordCorrect = await verifyPassword('Munabhai@6375', admin!.passwordHash);
   assert(isPasswordCorrect, 'Admin password hash verifies correctly');
 
   const token = signToken({
