@@ -151,30 +151,29 @@ export default function UpiPaymentModal({
             </div>
           </div>
 
-          {/* QR Code Section */}
-          <div className="flex flex-col items-center justify-center space-y-3 p-4 rounded-2xl bg-slate-900 dark:bg-black/60 border border-slate-800 dark:border-[#D6A84F]/30 text-white shadow-inner">
-            <div className="text-center space-y-0.5">
-              <span className="text-xs font-bold text-[#F0C96A]">PhonePe • Google Pay • Paytm • BHIM</span>
-              <p className="text-[11px] text-slate-400">Scan with any UPI App to Pay ₹{amount}</p>
+          {/* PhonePe Native Style QR Card */}
+          <div className="flex flex-col items-center justify-center p-5 rounded-3xl bg-[#0F081D] border-2 border-[#5F259F]/60 text-white shadow-2xl relative overflow-hidden">
+            {/* PhonePe Brand Header Pill */}
+            <div className="flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#5F259F]/40 border border-[#8A3FFC]/40 text-xs font-bold text-[#D4BBFF] mb-3">
+              <span>PhonePe • GPay • Paytm • Any UPI</span>
             </div>
 
-            {/* Official QR Code Image */}
-            <div className="p-2.5 rounded-2xl bg-white shadow-xl flex items-center justify-center max-w-[220px]">
+            {/* Crisp Cropped QR Scanner Image */}
+            <div className="w-full max-w-[260px] sm:max-w-[280px] rounded-2xl overflow-hidden shadow-2xl flex items-center justify-center bg-black">
               <img
                 src="/images/payment-qr.png"
                 alt="PhonePe UPI QR Scanner - Mahipal Choudhary"
-                className="w-full h-auto object-contain rounded-xl select-none"
+                className="w-full h-auto object-contain select-none"
               />
             </div>
 
-            <div className="text-center space-y-1">
-              <p className="text-xs font-bold text-white">Mahipal Choudhary (Mahi Skills)</p>
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/10 border border-white/10 text-xs">
-                <span className="font-mono text-[#F0C96A] font-bold select-all">{upiId}</span>
+            <div className="text-center mt-3 space-y-1.5 w-full">
+              <div className="inline-flex items-center justify-between gap-2 px-3.5 py-2 rounded-xl bg-white/10 border border-white/10 text-xs w-full max-w-[280px]">
+                <span className="font-mono text-[#F0C96A] font-extrabold select-all truncate">{upiId}</span>
                 <button
                   type="button"
                   onClick={handleCopyUpi}
-                  className="text-slate-300 hover:text-white flex items-center gap-1 font-semibold text-[11px]"
+                  className="px-2.5 py-1 rounded-lg bg-white/15 hover:bg-white/25 text-white flex items-center gap-1 font-bold text-[11px] shrink-0 transition-colors"
                   title="Copy UPI ID"
                 >
                   {copied ? (
@@ -185,7 +184,7 @@ export default function UpiPaymentModal({
                   ) : (
                     <>
                       <Copy className="w-3.5 h-3.5" />
-                      <span>Copy</span>
+                      <span>Copy UPI</span>
                     </>
                   )}
                 </button>
