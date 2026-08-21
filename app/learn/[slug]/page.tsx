@@ -253,14 +253,35 @@ export default function CourseLearningPlayer() {
           {/* Responsive Video Container */}
           <div className="w-full bg-black aspect-video max-h-[70vh] relative flex items-center justify-center shadow-2xl">
             {currentLesson?.videoUrl ? (
-              <video
-                key={currentLesson.id}
-                src={currentLesson.videoUrl}
-                controls
-                autoPlay
-                playsInline
-                className="w-full h-full object-contain"
-              />
+              (() => {
+                const url = currentLesson.videoUrl as string;
+                // Detect Google Drive links and convert to embed preview
+                const driveMatch = url.match(/drive\.google\.com\/file\/d\/([^\/]+)/);
+                if (driveMatch) {
+                  const fileId = driveMatch[1];
+                  return (
+                    <iframe
+                      key={currentLesson.id}
+                      src={`https://drive.google.com/file/d/${fileId}/preview`}
+                      allow="autoplay; encrypted-media"
+                      allowFullScreen
+                      className="w-full h-full"
+                      style={{ border: 'none' }}
+                    />
+                  );
+                }
+                // Normal video for other URLs
+                return (
+                  <video
+                    key={currentLesson.id}
+                    src={url}
+                    controls
+                    autoPlay
+                    playsInline
+                    className="w-full h-full object-contain"
+                  />
+                );
+              })()
             ) : (
               <div className="text-center p-8 text-[#94A3B8]">
                 <Play className="w-12 h-12 text-[#D6A84F] mx-auto mb-2 opacity-50" />
