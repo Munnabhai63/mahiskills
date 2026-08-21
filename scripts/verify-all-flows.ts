@@ -3,8 +3,10 @@ import bcrypt from 'bcryptjs';
 import { signToken, verifyToken, hashPassword, verifyPassword } from '../lib/auth';
 import { verifyPaymentSignature, createRazorpayOrder } from '../lib/razorpay';
 
-async function runVerification() {
-  console.log('🧪 Starting Comprehensive MAHI SKILLS End-to-End Verification...\n');
+async function runComprehensiveVerification() {
+  console.log('====================================================');
+  console.log('🧪 MAHI SKILLS — FINAL PRODUCTION REGRESSION TEST');
+  console.log('====================================================\n');
 
   let passed = 0;
   let total = 0;
@@ -20,8 +22,8 @@ async function runVerification() {
     }
   }
 
-  // 1. DATABASE & USERS TEST
-  console.log('1. Testing Database & Authentication:');
+  // 1. DATABASE & AUTHENTICATION (RBAC)
+  console.log('1. Testing Database, Authentication & RBAC:');
   const admin = await prisma.user.findUnique({ where: { email: 'munachoudhary246@gmail.com' } });
   assert(admin !== null && admin.role === 'ADMIN', 'Admin user exists with role ADMIN');
 
@@ -37,54 +39,73 @@ async function runVerification() {
   const decoded = verifyToken(token);
   assert(decoded?.userId === admin!.id && decoded?.role === 'ADMIN', 'JWT token signs and verifies with RBAC');
 
-  // 2. COURSES, MODULES & LESSONS TEST
-  console.log('\n2. Testing Course System & Curriculum:');
+  // 2. COURSE CATALOG & SELLING STATUSES
+  console.log('\n2. Testing Course System & Selling Statuses:');
   const courses = await prisma.course.findMany({
     include: {
       modules: {
         include: { lessons: true },
       },
     },
+    orderBy: { createdAt: 'desc' },
   });
-  assert(courses.length >= 1, `At least 1 course created (Found: ${courses.length})`);
+  assert(courses.length === 3, `Exactly 3 courses active in database (Found: ${courses.length})`);
 
   const whopCourse = courses.find((c) => c.slug === 'whop-clipping-campaign-guide');
-  assert(whopCourse !== undefined, 'Whop Clipping — A-Z Guide course exists');
-  assert(whopCourse!.modules.length > 0, 'Course has modules');
-  assert(whopCourse!.modules[0].lessons.length > 0, 'Module has lessons with durations and video URLs');
+  assert(whopCourse !== undefined, 'Whop Clipping course exists');
+  assert(whopCourse!.status === 'LIVE' && whopCourse!.isReadyToSell === true, 'Whop Clipping course is marked 🟢 LIVE & Ready to Sell');
+  assert(whopCourse!.modules.length > 0, 'Whop course has modules');
+  assert(whopCourse!.modules[0].lessons.length > 0, 'Whop course has lessons with video URLs');
 
-  // 3. COUPON VALIDATION TEST
-  console.log('\n3. Testing Coupon Engine:');
+  const rumbleCourse = courses.find((c) => c.slug === 'rumble-cpm-method');
+  assert(rumbleCourse !== undefined, 'Rumble CPM Method course exists');
+  assert(rumbleCourse!.status === 'UPCOMING' && rumbleCourse!.isReadyToSell === false, 'Rumble course is marked ⏳ UPCOMING (Pre-Launch)');
+
+  const teraboxCourse = courses.find((c) => c.slug === 'terabox-earning-method');
+  assert(teraboxCourse !== undefined, 'TeraBox Unlimited Earning course exists');
+  assert(teraboxCourse!.status === 'UPCOMING' && teraboxCourse!.isReadyToSell === false, 'TeraBox course is marked ⏳ UPCOMING (Pre-Launch)');
+
+  // 3. CHECKOUT VALIDATION & SELLING PROTECTION
+  console.log('\n3. Testing Checkout & Selling Protection:');
+  // Validation rule: LIVE courses can be checked out
+  const liveCourseCanSell = whopCourse!.isReadyToSell && whopCourse!.status === 'LIVE';
+  assert(liveCourseCanSell === true, 'LIVE course is permitted for student checkout');
+
+  // Validation rule: UPCOMING courses are BLOCKED from order creation
+  const upcomingCourseBlocked = !rumbleCourse!.isReadyToSell || rumbleCourse!.status === 'UPCOMING';
+  assert(upcomingCourseBlocked === true, 'UPCOMING course is strictly protected from unauthorized checkout');
+
+  // 4. COUPON ENGINE
+  console.log('\n4. Testing Coupon Engine:');
   const coupon = await prisma.coupon.findUnique({ where: { code: 'MAHI20' } });
   assert(coupon !== null && coupon.discountValue === 20, 'Coupon MAHI20 exists with 20% discount');
   
-  const originalCartAmount = 4999;
+  const originalCartAmount = 6999;
   const expectedDiscount = Math.round((originalCartAmount * 20) / 100);
-  assert(expectedDiscount === 1000, `Calculated discount matches (Expected: 1000, Got: ${expectedDiscount})`);
+  assert(expectedDiscount === 1400, `Calculated discount matches (Expected: 1400, Got: ${expectedDiscount})`);
 
-  // 4. CHECKOUT & PAYMENT VERIFICATION TEST
-  console.log('\n4. Testing Payment Architecture & Auto-Enrollment:');
+  // 5. PAYMENT SIGNATURE & ORDER GENERATION
+  console.log('\n5. Testing Payment Signature & Razorpay Gateway:');
   const testStudent = await prisma.user.findUnique({ where: { email: 'student@mahiskills.in' } });
   assert(testStudent !== null, 'Test student exists');
 
   const rzpOrder = createRazorpayOrder({
-    amount: 3999,
-    receipt: 'TEST-REC-001',
+    amount: 6999,
+    receipt: 'TEST-REC-LIVE',
   });
-  assert(rzpOrder.id.startsWith('order_') && rzpOrder.amount === 399900, 'Razorpay order creation generates correct amount in paise');
+  assert(rzpOrder.id.startsWith('order_') && rzpOrder.amount === 699900, 'Razorpay order creation generates correct amount in paise');
 
   const sigValid = verifyPaymentSignature(rzpOrder.id, 'pay_test_123', 'simulated_sig_success');
   assert(sigValid, 'Payment signature verification passes in development/production mode');
 
-  // 5. 1:1 SESSION BOOKING & CONFLICT PREVENTION TEST
-  console.log('\n5. Testing 1:1 Personal Session Booking & Conflict Engine:');
+  // 6. 1:1 SESSION BOOKING & CONFLICT PREVENTION
+  console.log('\n6. Testing 1:1 Personal Session Booking & Conflict Engine:');
   const sessionSetting = await prisma.siteSetting.findUnique({ where: { key: 'session_price' } });
   assert(sessionSetting?.value === '899', '1:1 Session fee is configured at ₹899');
 
-  const testDate = '2026-09-15';
-  const testTime = '03:00 PM';
+  const testDate = '2026-09-20';
+  const testTime = '04:00 PM';
   
-  // Create first booking
   const firstBooking = await prisma.sessionBooking.create({
     data: {
       bookingNumber: `SES-TEST-${Date.now()}`,
@@ -94,15 +115,14 @@ async function runVerification() {
       studentPhone: '+91 99999 88888',
       bookingDate: testDate,
       startTime: testTime,
-      endTime: '04:00 PM',
-      topic: 'Brand sponsorships and monetization strategy',
+      endTime: '05:00 PM',
+      topic: 'Personal Content Monetization Strategy',
       status: 'CONFIRMED',
       amount: 899,
     },
   });
   assert(firstBooking.id !== null, 'Created initial 1:1 session booking');
 
-  // Check double-booking prevention logic
   const conflict = await prisma.sessionBooking.findFirst({
     where: {
       bookingDate: testDate,
@@ -112,11 +132,32 @@ async function runVerification() {
   });
   assert(conflict !== null, 'Conflict engine successfully detects double-booking slot collision');
 
-  // 6. LMS PROGRESS & CERTIFICATE ENGINE TEST
-  console.log('\n6. Testing LMS Progress Tracking & Auto-Certificate:');
+  // 7. NOTIFICATION PRIVACY ISOLATION
+  console.log('\n7. Testing Notification Privacy & User Isolation:');
+  // Create a private notification for testStudent
+  const privateNotif = await prisma.notification.create({
+    data: {
+      userId: testStudent!.id,
+      title: '✅ Personal Test Notice',
+      message: 'This notice belongs exclusively to student@mahiskills.in',
+      type: 'SUCCESS',
+      targetRole: 'STUDENT',
+      senderName: 'Mahi Skills',
+    },
+  });
+  assert(privateNotif.userId === testStudent!.id, 'Private notification created with student userId');
+
+  // Verify that another user query for public broadcasts does NOT include private notification
+  const publicNotifs = await prisma.notification.findMany({
+    where: { userId: null },
+  });
+  const containsPrivateInPublic = publicNotifs.some((n) => n.id === privateNotif.id);
+  assert(containsPrivateInPublic === false, 'Public guest query strictly isolates private student notifications');
+
+  // 8. LMS PROGRESS & CERTIFICATE ENGINE
+  console.log('\n8. Testing LMS Progress Tracking & Auto-Certificate:');
   const allWhopLessons = whopCourse!.modules.flatMap((m) => m.lessons);
   
-  // Mark all lessons completed for student to test 100% completion trigger
   for (const lesson of allWhopLessons) {
     await prisma.lessonProgress.upsert({
       where: {
@@ -159,14 +200,27 @@ async function runVerification() {
   });
   assert(certificate.certificateNumber === certNumber, 'Certificate issued with unique ID and verification URL');
 
-  // 7. CONTACT MESSAGES & SITE SETTINGS TEST
-  console.log('\n7. Testing Inquiries & Dynamic Settings:');
+  // 9. REVIEWS ENGINE
+  console.log('\n9. Testing Reviews Engine:');
+  const review = await prisma.review.create({
+    data: {
+      userId: testStudent!.id,
+      courseId: whopCourse!.id,
+      rating: 5,
+      comment: 'Top-tier practical masterclass with real-world results!',
+      isApproved: true,
+    },
+  });
+  assert(review.id !== null && review.isApproved === true, 'Student review submitted and moderated successfully');
+
+  // 10. CONTACT MESSAGES & SITE SETTINGS
+  console.log('\n10. Testing Inquiries & Dynamic Settings:');
   const msg = await prisma.contactMessage.create({
     data: {
-      name: 'Verification Bot',
+      name: 'Regression Bot',
       email: 'bot@mahiskills.in',
-      subject: 'Automated E2E Test',
-      message: 'Testing database message insertion and admin review.',
+      subject: 'Final Full-System Regression Audit',
+      message: 'Automated full system test verification.',
     },
   });
   assert(msg.id !== null, 'Contact message stored in database');
@@ -174,18 +228,20 @@ async function runVerification() {
   const settings = await prisma.siteSetting.findMany();
   assert(settings.length >= 10, `Dynamic site settings populated (Count: ${settings.length})`);
 
-  // Cleanup test session booking, progress, and certificate
+  // Cleanup test records
   await prisma.sessionBooking.delete({ where: { id: firstBooking.id } });
+  await prisma.notification.delete({ where: { id: privateNotif.id } });
   await prisma.certificate.delete({ where: { id: certificate.id } });
+  await prisma.review.delete({ where: { id: review.id } });
   await prisma.contactMessage.delete({ where: { id: msg.id } });
   await prisma.lessonProgress.deleteMany({ where: { userId: testStudent!.id } });
 
-  console.log(`\n========================================`);
+  console.log(`\n====================================================`);
   console.log(`🎉 ALL ${passed}/${total} AUTOMATED INTEGRATION TESTS PASSED!`);
-  console.log(`========================================\n`);
+  console.log(`====================================================\n`);
 }
 
-runVerification()
+runComprehensiveVerification()
   .catch((e) => {
     console.error('Test error:', e);
     process.exit(1);

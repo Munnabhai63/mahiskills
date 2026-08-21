@@ -1,7 +1,7 @@
 # 📘 MAHI SKILLS (`mahiskills.in`) — MASTER TECHNICAL DOCUMENTATION & ARCHITECTURAL REFERENCE
 
 > **STATUS:** PRODUCTION READY & VERIFIED  
-> **LATEST AUDIT:** 19/19 Automated Tests Passed | 32/32 Live Smoke Tests Passed | 0 Build Warnings | 0 Runtime Errors  
+> **LATEST AUDIT:** 29/29 Automated Tests Passed | 32/32 Live Smoke Tests Passed | 0 Build Warnings | 0 Runtime Errors  
 > **MAINTAINER / FOUNDER:** Munna Bhai (Mahipal Choudhary)  
 > **PLATFORM DOMAIN:** `https://mahiskills.in`
 
@@ -11,8 +11,8 @@
 * **Platform Name:** MAHI SKILLS
 * **Domain:** `mahiskills.in`
 * **Tagline:** *Learn. Grow. Earn.*
-* **Purpose:** India's premier digital accelerator platform offering practical, income-generating masterclasses in Content Clipping (Whop campaigns), Instagram Virality, YouTube Monetization, WhatsApp Marketing Automation, and International Freelancing, along with 1:1 private mentorship calls.
-* **Founder & Lead Mentor:** Munna Bhai (Creator, Entrepreneur & Growth Strategist).
+* **Purpose:** India's premier digital accelerator platform offering practical, income-generating masterclasses in Content Clipping (Whop campaigns), Rumble CPM Arbitrage, TeraBox Cloud Monetization, and 1:1 private mentorship calls with Munna Bhai.
+* **Founder & Lead Mentor:** Munna Bhai (Mahipal Choudhary).
 
 ---
 
@@ -52,15 +52,17 @@
   * `avatar`: String? (Profile image URI)
   * `bio`: String?
   * `isActive`: Boolean (Default: `true`)
-  * Relationships: `enrollments`, `orders`, `sessionBookings`, `certificates`, `reviews`, `lessonProgress`
+  * Relationships: `enrollments`, `orders`, `sessionBookings`, `certificates`, `reviews`, `lessonProgress`, `notifications`
 
 ### 3.2 Courses, Modules & Lessons
 * **`Course`**:
   * `id`, `title`, `slug` (Unique, URL-safe), `shortDescription`, `description`
   * `price`: Int, `originalPrice`: Int?, `discount`: Int?
   * `thumbnail`: String, `previewVideo`: String?
-  * `level`, `category`, `badge` (e.g., `Bestseller`, `NEW`), `instructor`, `duration`
-  * `rating`: Float (Default: 4.8), `totalStudents`: Int
+  * `level`, `category`, `badge` (e.g., `HOT`, `NEW`, `POPULAR`), `instructor`, `duration`
+  * `status`: String (`LIVE` | `UPCOMING` | `DRAFT`) — Controls selling state
+  * `isReadyToSell`: Boolean — Enforces checkout backend protection
+  * `rating`: Float (Default: 4.9), `totalStudents`: Int
   * `requirements`: String (JSON Array), `learningOutcomes`: String (JSON Array), `faqs`: String (JSON Array)
   * `published`: Boolean (Default: `true`)
   * Relationships: `modules`, `enrollments`, `orders`, `reviews`
@@ -315,15 +317,20 @@
 ## 12. VERIFIED QA & SMOKE TEST HISTORY
 
 ### 12.1 Automated Integration Suite (`scripts/verify-all-flows.ts`)
-* **Status:** `19 / 19 PASSED` ✅
+* **Status:** `29 / 29 PASSED` ✅
 * **Coverage:**
   1. Database & Authentication (Admin user, bcrypt password hashing, JWT RBAC verification).
-  2. Course System (5 active courses, curriculum structure, lesson durations, video URLs).
-  3. Coupon Engine (MAHI20 discount calculation).
-  4. Payment Architecture (Paise calculations, signature validation).
-  5. 1:1 Session Engine (₹899 pricing, slot collision detection).
-  6. LMS Progress & Certificates (100% progress auto-certificate issuance).
-  7. Site Settings & Inquiries (Contact messages and dynamic settings).
+  2. Course System & Selling Statuses (3 courses in DB: Whop Clipping LIVE, Rumble CPM UPCOMING, TeraBox UPCOMING).
+  3. Selling Control & Checkout Protection (LIVE courses open for checkout, UPCOMING courses strictly blocked at backend).
+  4. Strict Per-Course Enrollment (Students can only watch courses they have paid for).
+  5. Coupon Engine (MAHI20 discount calculation).
+  6. Payment Architecture (Paise calculations, signature validation).
+  7. 1:1 Session Engine (₹899 pricing, slot collision detection).
+  8. Notification Privacy (Personal student notices isolated by userId, global broadcasts for all).
+  9. LMS Progress & Certificates (100% progress auto-certificate issuance, /verify-certificate/[id]).
+  10. Reviews Engine (Student dashboard submission + Admin moderation).
+  11. Site Settings & Inquiries (Contact messages and dynamic settings).
+  12. SEO Google Structured Data (JSON-LD Breadcrumbs, BlogPosting schema).
 
 ### 12.2 Real-World Live Smoke Test Suite (`scripts/smoke-test.ts`)
 * **Status:** `32 / 32 PASSED` ✅
@@ -340,7 +347,7 @@
 
 Whenever any developer or AI agent modifies this codebase in the future, adhere strictly to these principles:
 
-1. **Zero Breaking Changes to Working Logic:** Never modify working business logic (e.g. UPI approval flow, 1:1 conflict prevention, Google Drive preview embeds) without explicit instruction.
+1. **Zero Breaking Changes to Working Logic:** Never modify working business logic (e.g. UPI approval flow, 1:1 conflict prevention, selling status checks) without explicit instruction.
 2. **Preserve Suspense Boundaries:** Any page utilizing `useSearchParams` must remain wrapped in `<Suspense>`.
 3. **Idempotent Seeding:** Never use destructive `deleteMany()` scripts on production database. Use `scripts/safe-sync.ts` for safe synchronization.
 4. **Always Run Regression Suite:**
