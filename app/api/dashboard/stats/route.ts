@@ -63,6 +63,14 @@ export async function GET() {
         totalLessons,
         enrolledAt: e.enrolledAt,
         completedAt: e.completedAt,
+        course: {
+          id: e.course.id,
+          title: e.course.title,
+          slug: e.course.slug,
+          thumbnail: e.course.thumbnail,
+          instructor: e.course.instructor,
+          duration: e.course.duration,
+        },
       };
     });
 

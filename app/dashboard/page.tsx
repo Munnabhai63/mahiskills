@@ -92,7 +92,7 @@ export default function StudentDashboardPage() {
   }
 
   const enrollments = stats?.enrollments || [];
-  const sessionBookings = stats?.sessionBookings || [];
+  const sessionBookings = stats?.sessions || stats?.sessionBookings || [];
   const orders = stats?.orders || [];
   const certificates = stats?.certificates || [];
 
@@ -208,54 +208,61 @@ export default function StudentDashboardPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {enrollments.map((enr: any) => (
-                <div
-                  key={enr.id}
-                  className="rounded-3xl bg-white dark:bg-[#0B1728] border border-slate-200 dark:border-white/10 overflow-hidden shadow-sm flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="relative aspect-video w-full overflow-hidden bg-slate-900">
-                      <img
-                        src={enr.course.thumbnail}
-                        alt={enr.course.title}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
+              {enrollments.map((enr: any) => {
+                const cTitle = enr.title || enr.course?.title || 'Course';
+                const cThumbnail = enr.thumbnail || enr.course?.thumbnail || '/images/placeholder-course.jpg';
+                const cSlug = enr.slug || enr.course?.slug || '';
+                const progress = enr.progressPercent ?? 0;
 
-                    <div className="p-5 space-y-3">
-                      <h3 className="text-base font-bold text-slate-900 dark:text-white line-clamp-1">
-                        {enr.course.title}
-                      </h3>
+                return (
+                  <div
+                    key={enr.id}
+                    className="rounded-3xl bg-white dark:bg-[#0B1728] border border-slate-200 dark:border-white/10 overflow-hidden shadow-sm flex flex-col justify-between"
+                  >
+                    <div>
+                      <div className="relative aspect-video w-full overflow-hidden bg-slate-900">
+                        <img
+                          src={cThumbnail}
+                          alt={cTitle}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
 
-                      {/* Progress Bar */}
-                      <div className="space-y-1.5">
-                        <div className="flex justify-between text-xs font-semibold">
-                          <span className="text-slate-500 dark:text-slate-400">Course Progress</span>
-                          <span className="text-[#C49339] dark:text-[#F0C96A] font-bold">
-                            {enr.progressPercent}%
-                          </span>
-                        </div>
-                        <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-white/10 overflow-hidden">
-                          <div
-                            className="h-full bg-gradient-to-r from-[#D6A84F] to-emerald-500 rounded-full transition-all duration-500"
-                            style={{ width: `${enr.progressPercent}%` }}
-                          />
+                      <div className="p-5 space-y-3">
+                        <h3 className="text-base font-bold text-slate-900 dark:text-white line-clamp-1">
+                          {cTitle}
+                        </h3>
+
+                        {/* Progress Bar */}
+                        <div className="space-y-1.5">
+                          <div className="flex justify-between text-xs font-semibold">
+                            <span className="text-slate-500 dark:text-slate-400">Course Progress</span>
+                            <span className="text-[#C49339] dark:text-[#F0C96A] font-bold">
+                              {progress}%
+                            </span>
+                          </div>
+                          <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-white/10 overflow-hidden">
+                            <div
+                              className="h-full bg-gradient-to-r from-[#D6A84F] to-emerald-500 rounded-full transition-all duration-500"
+                              style={{ width: `${progress}%` }}
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="p-5 pt-0 border-t border-slate-100 dark:border-white/5 mt-2">
-                    <Link
-                      href={`/learn/${enr.course.slug}`}
-                      className="w-full py-2.5 rounded-xl bg-slate-900 dark:bg-[#D6A84F] hover:bg-[#D6A84F] dark:hover:bg-[#C49339] text-white dark:text-slate-950 font-bold text-xs flex items-center justify-center gap-2 transition-colors shadow-xs"
-                    >
-                      <Play className="w-4 h-4 fill-current" />
-                      <span>{enr.progressPercent === 100 ? 'Review Course' : 'Continue Learning'}</span>
-                    </Link>
+                    <div className="p-5 pt-0 border-t border-slate-100 dark:border-white/5 mt-2">
+                      <Link
+                        href={`/learn/${cSlug}`}
+                        className="w-full py-2.5 rounded-xl bg-slate-900 dark:bg-[#D6A84F] hover:bg-[#D6A84F] dark:hover:bg-[#C49339] text-white dark:text-slate-950 font-bold text-xs flex items-center justify-center gap-2 transition-colors shadow-xs"
+                      >
+                        <Play className="w-4 h-4 fill-current" />
+                        <span>{progress === 100 ? 'Review Course' : 'Continue Learning'}</span>
+                      </Link>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
