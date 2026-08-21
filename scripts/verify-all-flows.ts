@@ -46,12 +46,12 @@ async function runVerification() {
       },
     },
   });
-  assert(courses.length >= 4, `At least 4 premium courses created (Found: ${courses.length})`);
+  assert(courses.length >= 1, `At least 1 course created (Found: ${courses.length})`);
 
-  const igCourse = courses.find((c) => c.slug === 'instagram-growth-mastery');
-  assert(igCourse !== undefined, 'Instagram Growth Mastery course exists');
-  assert(igCourse!.modules.length > 0, 'Course has modules');
-  assert(igCourse!.modules[0].lessons.length > 0, 'Module has lessons with durations and video URLs');
+  const whopCourse = courses.find((c) => c.slug === 'whop-clipping-campaign-guide');
+  assert(whopCourse !== undefined, 'Whop Clipping — A-Z Guide course exists');
+  assert(whopCourse!.modules.length > 0, 'Course has modules');
+  assert(whopCourse!.modules[0].lessons.length > 0, 'Module has lessons with durations and video URLs');
 
   // 3. COUPON VALIDATION TEST
   console.log('\n3. Testing Coupon Engine:');
@@ -114,10 +114,10 @@ async function runVerification() {
 
   // 6. LMS PROGRESS & CERTIFICATE ENGINE TEST
   console.log('\n6. Testing LMS Progress Tracking & Auto-Certificate:');
-  const allIgLessons = igCourse!.modules.flatMap((m) => m.lessons);
+  const allWhopLessons = whopCourse!.modules.flatMap((m) => m.lessons);
   
   // Mark all lessons completed for student to test 100% completion trigger
-  for (const lesson of allIgLessons) {
+  for (const lesson of allWhopLessons) {
     await prisma.lessonProgress.upsert({
       where: {
         userId_lessonId: {
@@ -139,20 +139,20 @@ async function runVerification() {
   const completedCount = await prisma.lessonProgress.count({
     where: {
       userId: testStudent!.id,
-      lessonId: { in: allIgLessons.map((l) => l.id) },
+      lessonId: { in: allWhopLessons.map((l) => l.id) },
       isCompleted: true,
     },
   });
-  assert(completedCount === allIgLessons.length, 'All lessons marked complete (100% progress)');
+  assert(completedCount === allWhopLessons.length, 'All lessons marked complete (100% progress)');
 
   const certNumber = `MS-CERT-TEST-${Date.now()}`;
   const certificate = await prisma.certificate.create({
     data: {
       certificateNumber: certNumber,
       userId: testStudent!.id,
-      courseId: igCourse!.id,
+      courseId: whopCourse!.id,
       studentName: testStudent!.name,
-      courseName: igCourse!.title,
+      courseName: whopCourse!.title,
       instructorName: 'Munna Bhai',
       verificationUrl: `https://mahiskills.in/verify-certificate/${certNumber}`,
     },

@@ -91,6 +91,7 @@ export async function POST(req: NextRequest) {
       if (order.userId) {
         await tx.notification.create({
           data: {
+            userId: order.userId,
             title: '✅ Payment Approved!',
             message: `Your payment for "${order.course?.title || 'your order'}" has been approved! You now have full access. Start learning now!`,
             type: 'SUCCESS',

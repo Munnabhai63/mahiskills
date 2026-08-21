@@ -27,6 +27,7 @@ model User {
   reviews           Review[]
   certificates      Certificate[]
   notificationReads NotificationRead[]
+  notifications     Notification[]
 }
 
 model Course {
@@ -291,14 +292,16 @@ model SiteSetting {
 
 model Notification {
   id          String   @id @default(uuid())
+  userId      String?  // If set, personal notification for this user. If null, global broadcast.
   title       String
   message     String
-  type        String   @default("ANNOUNCEMENT") // ANNOUNCEMENT, COURSE_UPDATE, LIVE_SESSION, PROMO, ALERT
-  targetRole  String   @default("ALL") // ALL, STUDENT
+  type        String   @default("ANNOUNCEMENT") // ANNOUNCEMENT, COURSE_UPDATE, LIVE_SESSION, PROMO, ALERT, SUCCESS
+  targetRole  String   @default("ALL") // ALL, STUDENT, ADMIN
   link        String?
   senderName  String   @default("Munna Bhai")
   createdAt   DateTime @default(now())
 
+  user  User?              @relation(fields: [userId], references: [id], onDelete: Cascade)
   reads NotificationRead[]
 }
 

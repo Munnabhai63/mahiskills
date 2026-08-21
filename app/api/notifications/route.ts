@@ -6,12 +6,25 @@ export async function GET(req: NextRequest) {
   try {
     const user = await getCurrentUser();
 
-    // Fetch all active notifications (newest first, limit 30)
+    // Fetch active notifications (public broadcasts + personal notifications for this user)
+    const whereClause: any = user
+      ? {
+          OR: [
+            { userId: null, targetRole: { in: ['ALL', user.role] } },
+            { userId: user.id },
+          ],
+        }
+      : {
+          userId: null,
+          targetRole: 'ALL',
+        };
+
     const notifications = await prisma.notification.findMany({
+      where: whereClause,
       orderBy: { createdAt: 'desc' },
       take: 30,
       include: {
-        reads: user ? { where: { userId: user.id } } : true,
+        reads: user ? { where: { userId: user.id } } : false,
       },
     });
 

@@ -7,7 +7,6 @@ import {
   CheckCheck,
   ExternalLink,
   Sparkles,
-  Radio,
   Clock,
   X,
 } from 'lucide-react';
@@ -18,22 +17,58 @@ export default function NotificationBell() {
   const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const getLocalReadIds = (): string[] => {
+    if (typeof window === 'undefined') return [];
+    try {
+      const stored = localStorage.getItem('mahi_read_notifications');
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  };
+
+  const saveLocalReadId = (id: string) => {
+    if (typeof window === 'undefined') return;
+    try {
+      const current = getLocalReadIds();
+      if (!current.includes(id)) {
+        current.push(id);
+        localStorage.setItem('mahi_read_notifications', JSON.stringify(current));
+      }
+    } catch {}
+  };
+
+  const saveAllLocalReadIds = (ids: string[]) => {
+    if (typeof window === 'undefined') return;
+    try {
+      const current = getLocalReadIds();
+      const merged = Array.from(new Set([...current, ...ids]));
+      localStorage.setItem('mahi_read_notifications', JSON.stringify(merged));
+    } catch {}
+  };
 
   const fetchNotifications = () => {
     fetch('/api/notifications')
       .then((res) => res.json())
       .then((data) => {
-        if (data.notifications) setNotifications(data.notifications);
-        if (typeof data.unreadCount === 'number') setUnreadCount(data.unreadCount);
+        if (data.notifications) {
+          const localRead = getLocalReadIds();
+          const processed = data.notifications.map((n: any) => ({
+            ...n,
+            isRead: n.isRead || localRead.includes(n.id),
+          }));
+          setNotifications(processed);
+          const unread = processed.filter((n: any) => !n.isRead).length;
+          setUnreadCount(unread);
+        }
       })
       .catch(() => {});
   };
 
   useEffect(() => {
     fetchNotifications();
-    // Auto check every 30 seconds
     const interval = setInterval(fetchNotifications, 30000);
     return () => clearInterval(interval);
   }, [user]);
@@ -50,29 +85,37 @@ export default function NotificationBell() {
   }, []);
 
   const handleMarkAllRead = async () => {
-    try {
-      await fetch('/api/notifications/read', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ markAll: true }),
-      });
-      setUnreadCount(0);
-      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
-    } catch {}
+    const allIds = notifications.map((n) => n.id);
+    saveAllLocalReadIds(allIds);
+    setUnreadCount(0);
+    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+
+    if (user) {
+      try {
+        await fetch('/api/notifications/read', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ markAll: true }),
+        });
+      } catch {}
+    }
   };
 
   const handleNotificationClick = async (notif: any) => {
-    if (!notif.isRead && user) {
-      fetch('/api/notifications/read', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ notificationId: notif.id }),
-      }).catch(() => {});
+    saveLocalReadId(notif.id);
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === notif.id ? { ...n, isRead: true } : n))
+    );
+    setUnreadCount((prev) => Math.max(0, prev - 1));
 
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === notif.id ? { ...n, isRead: true } : n))
-      );
-      setUnreadCount((prev) => Math.max(0, prev - 1));
+    if (user) {
+      try {
+        await fetch('/api/notifications/read', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ notificationId: notif.id }),
+        });
+      } catch {}
     }
   };
 
@@ -88,7 +131,10 @@ export default function NotificationBell() {
     <div className="relative" ref={dropdownRef}>
       {/* Bell Trigger Button */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => {
+          setIsOpen(!isOpen);
+          if (!isOpen) fetchNotifications();
+        }}
         className="relative p-2 text-slate-700 dark:text-slate-200 hover:text-[#C49339] dark:hover:text-[#F0C96A] rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-all"
         title="Announcements & Alerts"
         aria-label="Notifications"
@@ -145,7 +191,7 @@ export default function NotificationBell() {
                   className={`p-4 transition-colors relative cursor-pointer ${
                     !n.isRead
                       ? 'bg-amber-500/5 dark:bg-[#D6A84F]/10 hover:bg-amber-500/10'
-                      : 'hover:bg-slate-50 dark:hover:bg-white/5'
+                      : 'hover:bg-slate-50 dark:hover:bg-white/5 opacity-80 hover:opacity-100'
                   }`}
                 >
                   {!n.isRead && (
@@ -159,6 +205,8 @@ export default function NotificationBell() {
                           ? '📹 Live Call'
                           : n.type === 'COURSE_UPDATE'
                           ? '🎓 Course'
+                          : n.type === 'SUCCESS'
+                          ? '✅ Success'
                           : n.type === 'PROMO'
                           ? '🏷️ Offer'
                           : '📢 Notice'}
@@ -166,6 +214,12 @@ export default function NotificationBell() {
                       <span className="text-[10px] text-slate-400 font-medium">
                         {formatTimeAgo(n.createdAt)}
                       </span>
+                      {n.isRead && (
+                        <span className="text-[10px] text-slate-400 flex items-center gap-0.5 ml-auto">
+                          <Check className="w-3 h-3 text-emerald-500" />
+                          <span>Read</span>
+                        </span>
+                      )}
                     </div>
 
                     <h4 className="text-xs font-bold text-slate-950 dark:text-white leading-snug">
@@ -182,7 +236,10 @@ export default function NotificationBell() {
                         target={n.link.startsWith('http') ? '_blank' : '_self'}
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-1 text-[11px] font-bold text-[#C49339] dark:text-[#F0C96A] hover:underline pt-1"
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleNotificationClick(n);
+                        }}
                       >
                         <span>Open Details</span>
                         <ExternalLink className="w-3 h-3" />
