@@ -32,13 +32,50 @@ export default function VideoModal({ isOpen, onClose, videoUrl, title }: VideoMo
         </div>
 
         <div className="relative aspect-video bg-black flex items-center justify-center">
-          <video
-            src={videoUrl}
-            controls
-            autoPlay
-            playsInline
-            className="w-full h-full object-contain"
-          />
+          {(() => {
+            if (!videoUrl) {
+              return <p className="text-sm text-slate-400">No video preview available</p>;
+            }
+
+            // Google Drive embed preview
+            const driveMatch = videoUrl.match(/drive\.google\.com\/file\/d\/([^\/]+)/);
+            if (driveMatch) {
+              return (
+                <iframe
+                  src={`https://drive.google.com/file/d/${driveMatch[1]}/preview`}
+                  allow="autoplay; encrypted-media"
+                  allowFullScreen
+                  className="w-full h-full"
+                  style={{ border: 'none' }}
+                />
+              );
+            }
+
+            // YouTube embed
+            const ytMatch = videoUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+            if (ytMatch) {
+              return (
+                <iframe
+                  src={`https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1`}
+                  allow="autoplay; encrypted-media; picture-in-picture"
+                  allowFullScreen
+                  className="w-full h-full"
+                  style={{ border: 'none' }}
+                />
+              );
+            }
+
+            // Standard video
+            return (
+              <video
+                src={videoUrl}
+                controls
+                autoPlay
+                playsInline
+                className="w-full h-full object-contain"
+              />
+            );
+          })()}
         </div>
       </div>
     </div>

@@ -184,7 +184,7 @@ export default function Navbar({ onOpenSearch }: NavbarProps) {
                       Student Dashboard
                     </Link>
                     <Link
-                      href="/dashboard"
+                      href="/dashboard?tab=courses"
                       onClick={() => setUserDropdownOpen(false)}
                       className="flex items-center gap-2 px-4 py-2 text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
                     >
@@ -192,7 +192,7 @@ export default function Navbar({ onOpenSearch }: NavbarProps) {
                       My Courses
                     </Link>
                     <Link
-                      href="/dashboard"
+                      href="/dashboard?tab=sessions"
                       onClick={() => setUserDropdownOpen(false)}
                       className="flex items-center gap-2 px-4 py-2 text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
                     >

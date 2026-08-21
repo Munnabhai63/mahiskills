@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import {
   BookOpen,
@@ -22,11 +22,13 @@ import {
   Sparkles,
 } from 'lucide-react';
 
-export default function StudentDashboardPage() {
+function StudentDashboardContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialTab = searchParams.get('tab') || 'courses';
   const { user, isLoading: authLoading, updateProfile } = useAuth();
 
-  const [activeTab, setActiveTab] = useState('courses');
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [stats, setStats] = useState<any>(null);
   const [loadingStats, setLoadingStats] = useState(true);
 
@@ -37,6 +39,13 @@ export default function StudentDashboardPage() {
   const [newPassword, setNewPassword] = useState('');
   const [profileMsg, setProfileMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+
+  useEffect(() => {
+    const tabFromUrl = searchParams.get('tab');
+    if (tabFromUrl) {
+      setActiveTab(tabFromUrl);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -579,3 +588,19 @@ export default function StudentDashboardPage() {
     </div>
   );
 }
+
+export default function StudentDashboardPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="max-w-7xl mx-auto px-4 py-20 text-center">
+          <div className="w-10 h-10 border-4 border-[#D6A84F] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+          <p className="text-slate-500 text-xs">Loading student dashboard...</p>
+        </div>
+      }
+    >
+      <StudentDashboardContent />
+    </Suspense>
+  );
+}
+

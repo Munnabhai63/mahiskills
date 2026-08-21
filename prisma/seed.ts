@@ -337,6 +337,70 @@ async function main() {
         },
       ],
     },
+    {
+      title: 'Whop Clipping — A-Z Guide',
+      slug: 'whop-clipping-campaign-guide',
+      shortDescription: 'Step-by-step full course to master Whop Clipping campaigns — from niche research to viral editing and scaling.',
+      description: 'Master the high-income skill of Whop Clipping and Content Monetization. Learn how to identify winning creator campaigns, extract viral moments, edit high-retention clips using CapCut & Premiere Pro, distribute across YouTube Shorts, TikTok & Instagram Reels, and optimize your submissions for maximum payout.',
+      price: 9999,
+      originalPrice: 26999,
+      discount: 63,
+      thumbnail: '/images/whop-clipping-guide.jpg',
+      previewVideo: 'https://drive.google.com/file/d/1nDFm7WJqidz2OshgXM4YR5PLfUV-Rjdw/view?usp=sharing',
+      level: 'All Levels (Beginner to Pro)',
+      category: 'Content Clipping & Monetization',
+      badge: 'NEW',
+      duration: '5+ Hours',
+      rating: 4.9,
+      totalStudents: 320,
+      requirements: JSON.stringify([
+        'A computer or smartphone with video editing software (CapCut / Premiere Pro)',
+        'An active internet connection',
+        'Basic understanding of social media platforms (YouTube Shorts, Reels, TikTok)',
+        'Consistency and willingness to follow the daily clipping blueprint',
+      ]),
+      learningOutcomes: JSON.stringify([
+        'Master the Whop platform ecosystem and find high-payout clipping campaigns',
+        'Conduct deep competitor analysis and identify viral content trends',
+        'Master professional clip editing, pacing, sound design, and text animations',
+        'Design high-CTR click-worthy covers and write viral captions',
+        'Distribute clips simultaneously across Shorts, Reels, and TikTok without shadowbans',
+        'Review analytics, optimize hook retention rate, and scale monthly clipping income',
+      ]),
+      faqs: JSON.stringify([
+        { q: 'Is this course suitable for complete beginners?', a: 'Yes! We start from complete basics of Whop account setup and progress to advanced multi-platform distribution and scaling.' },
+        { q: 'Do I get lifetime access and updates?', a: 'Yes, you get full lifetime access to all 4 modules, 6 video masterclasses, and future updates.' },
+        { q: 'Will I receive a verified certificate upon completion?', a: 'Yes, once you complete all lessons, your verifiable certificate signed by Munna Bhai will be generated.' },
+      ]),
+      modules: [
+        {
+          title: 'Module 1: Niche Selection & Research',
+          lessons: [
+            { title: 'Whop Platform Introduction & Niche Finding', duration: '45m', videoUrl: 'https://drive.google.com/file/d/1nDFm7WJqidz2OshgXM4YR5PLfUV-Rjdw/view?usp=sharing', isPreview: true },
+            { title: 'Competitor Analysis & Market Research', duration: '55m', videoUrl: 'https://drive.google.com/file/d/1w_4eMfLHLbAlmtEyOhWKO47HKbOXVarX/view?usp=sharing', isPreview: false },
+          ],
+        },
+        {
+          title: 'Module 2: Professional Clip Editing',
+          lessons: [
+            { title: 'Editing Tools & Clip Selection Masterclass', duration: '50m', videoUrl: 'https://drive.google.com/file/d/1wEZDsm03xAF3Z8MHa8gLuj5YzaLmXqTH/view?usp=sharing', isPreview: false },
+            { title: 'Captions, Effects & Professional Finishing', duration: '55m', videoUrl: 'https://drive.google.com/file/d/1Rn6Rm2bOTIAHNc16dxD6D4rLlxgLDLsY/view?usp=sharing', isPreview: false },
+          ],
+        },
+        {
+          title: 'Module 3: Multi-Platform Upload & Distribution',
+          lessons: [
+            { title: 'Upload Strategy — YouTube Shorts, TikTok & Reels', duration: '40m', videoUrl: 'https://drive.google.com/file/d/14Ljzjl04mwGbvBML18qYNPpSQV2JeyLD/view?usp=sharing', isPreview: false },
+          ],
+        },
+        {
+          title: 'Module 4: Campaign Review & Scaling',
+          lessons: [
+            { title: 'Campaign Review, Optimization & 30-Day Action Plan', duration: '60m', videoUrl: 'https://drive.google.com/file/d/172f5Yfz2QHywWaEEcAS8tjKawMnGXqjn/view?usp=sharing', isPreview: false },
+          ],
+        },
+      ],
+    },
   ];
 
   for (const cData of coursesData) {

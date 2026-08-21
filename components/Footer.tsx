@@ -191,6 +191,15 @@ export default function Footer() {
             <ul className="flex flex-col gap-2 text-xs sm:text-sm">
               <li>
                 <Link
+                  href="/courses/whop-clipping-campaign-guide"
+                  className="hover:text-[#C49339] dark:text-[#F0C96A] font-semibold transition-colors flex items-center gap-1.5"
+                >
+                  <span>Whop Clipping Guide</span>
+                  <span className="text-[9px] px-1 py-0.2 rounded bg-red-500 text-white font-bold">NEW</span>
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/courses/instagram-growth-mastery"
                   className="hover:text-[#C49339] dark:hover:text-[#F0C96A] transition-colors"
                 >

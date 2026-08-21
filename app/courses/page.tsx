@@ -12,6 +12,7 @@ export default function CoursesPage() {
 
   const categories = [
     'All',
+    'Content Clipping & Monetization',
     'Social Media & Growth',
     'Video Creation & Monetization',
     'Digital Marketing & Sales',
