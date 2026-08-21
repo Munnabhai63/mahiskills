@@ -83,6 +83,64 @@ async function safeSync() {
         },
       ],
     },
+    {
+      title: 'Rumble CPM Method — $100–$500/Day Blueprint',
+      slug: 'rumble-cpm-method',
+      shortDescription: 'Master the secret Rumble CPM arbitrage method — channel setup, high-earning tricks, CPM boost strategies, and daily $100–$500 automated earnings.',
+      description: 'Unlock the ultimate Rumble CPM Method to generate $100 to $500 per day. Learn how to create verified Rumble accounts, upload high-converting viral videos, boost your CPM safely, avoid account suspensions, and withdraw earnings directly to your bank account with 100% working proof.',
+      price: 19999, originalPrice: 49999, discount: 60,
+      thumbnail: '/images/rumble-cpm-method.jpg',
+      previewVideo: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+      level: 'All Levels (Beginner to Pro)', category: 'CPM & Video Monetization', badge: 'HOT', duration: '6+ Hours', rating: 5.0, totalStudents: 180,
+      requirements: JSON.stringify([
+        'A computer or smartphone with internet connection',
+        'Willingness to follow the step-by-step daily CPM workflow',
+        'No prior video editing or complex tech skills required'
+      ]),
+      learningOutcomes: JSON.stringify([
+        'Complete Rumble account setup & verification guide',
+        'Niche selection for highest Rumble CPM ($30 - $80+ CPM)',
+        'Secret video uploading & SEO ranking techniques',
+        'Advanced CPM Boost methods (100% working & safe)',
+        'High earning scaling tricks ($100 - $500 per day)',
+        'Live payout withdrawal proof & bank transfer methods'
+      ]),
+      faqs: JSON.stringify([
+        { q: 'Is this method working in 2026?', a: 'Yes! This is a 100% working, updated CPM blueprint tested and verified by Munna Bhai.' },
+        { q: 'Do I get direct support from Munna Bhai?', a: 'Yes, full mentorship support and lifetime access to future course updates are included.' },
+        { q: 'Can complete beginners start with this?', a: 'Absolutely! We start from complete zero — account creation to receiving your first payout.' }
+      ]),
+      modules: [
+        {
+          title: 'Module 1: Rumble Account Architecture & Verification',
+          lessons: [
+            { title: 'Rumble Platform Overview & Earning Potential', duration: '25m', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4', isPreview: true },
+            { title: 'Creating & Verifying High-Trust Rumble Accounts', duration: '35m', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4', isPreview: false },
+          ],
+        },
+        {
+          title: 'Module 2: High-CPM Niche Selection & Content Strategy',
+          lessons: [
+            { title: 'Top 5 Highest CPM Niches on Rumble', duration: '40m', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4', isPreview: false },
+            { title: 'Fast Video Creation & Automated Workflow', duration: '45m', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4', isPreview: false },
+          ],
+        },
+        {
+          title: 'Module 3: The Secret CPM Boost Method (Core System)',
+          lessons: [
+            { title: 'Step-by-Step CPM Boost Implementation', duration: '55m', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4', isPreview: false },
+            { title: 'Safety Protocols & Account Protection Secrets', duration: '40m', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyBlazes.mp4', isPreview: false },
+          ],
+        },
+        {
+          title: 'Module 4: Scaling to $100–$500/Day & Direct Bank Payouts',
+          lessons: [
+            { title: 'Daily Routine & Scaling Multiple Channels', duration: '50m', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4', isPreview: false },
+            { title: 'Payout Setup, Tax Forms & Direct Bank Transfer', duration: '35m', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4', isPreview: false },
+          ],
+        },
+      ],
+    },
   ];
 
   for (const c of allCourses) {

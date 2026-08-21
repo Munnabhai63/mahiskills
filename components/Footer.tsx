@@ -191,6 +191,15 @@ export default function Footer() {
             <ul className="flex flex-col gap-2 text-xs sm:text-sm">
               <li>
                 <Link
+                  href="/courses/rumble-cpm-method"
+                  className="hover:text-[#C49339] dark:text-[#F0C96A] font-semibold transition-colors flex items-center gap-1.5"
+                >
+                  <span>Rumble CPM Method</span>
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500 text-slate-950 font-black">HOT</span>
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/courses/whop-clipping-campaign-guide"
                   className="hover:text-[#C49339] dark:text-[#F0C96A] font-semibold transition-colors flex items-center gap-1.5"
                 >
