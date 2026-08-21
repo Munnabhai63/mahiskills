@@ -25,6 +25,8 @@ export async function GET(
                 isPreview: true,
                 order: true,
                 description: true,
+                videoUrl: true,
+                resources: true,
               },
             },
           },
