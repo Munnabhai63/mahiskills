@@ -22,6 +22,7 @@ export default function NewCoursePage() {
   const [thumbnail, setThumbnail] = useState('https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=1000&auto=format&fit=crop');
   const [previewVideo, setPreviewVideo] = useState('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4');
   const [published, setPublished] = useState(true);
+  const [status, setStatus] = useState('LIVE');
 
   // Arrays
   const [learningOutcomes, setLearningOutcomes] = useState<string[]>([
@@ -69,6 +70,8 @@ export default function NewCoursePage() {
           thumbnail,
           previewVideo,
           published,
+          status,
+          isReadyToSell: status === 'LIVE',
           learningOutcomes,
           requirements,
         }),
@@ -247,18 +250,84 @@ export default function NewCoursePage() {
           </div>
         </div>
 
-        {/* Publish Status Toggle */}
-        <div className="flex items-center gap-3 pt-2">
-          <input
-            type="checkbox"
-            id="publishToggle"
-            checked={published}
-            onChange={(e) => setPublished(e.target.checked)}
-            className="w-4 h-4 rounded text-[#D6A84F] focus:ring-[#D6A84F]"
-          />
-          <label htmlFor="publishToggle" className="text-xs font-bold text-slate-800 dark:text-white cursor-pointer">
-            Publish course immediately on website
+        {/* Course Status Selector */}
+        <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/10 space-y-3">
+          <label className="block text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">
+            Initial Selling Status
           </label>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <label
+              className={`p-3 rounded-xl border-2 flex items-center gap-2.5 cursor-pointer transition-all ${
+                status === 'LIVE'
+                  ? 'border-emerald-500 bg-emerald-500/10 text-emerald-900 dark:text-emerald-300 font-bold'
+                  : 'border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 text-slate-700 dark:text-slate-300 text-xs'
+              }`}
+            >
+              <input
+                type="radio"
+                name="newCourseStatus"
+                value="LIVE"
+                checked={status === 'LIVE'}
+                onChange={() => {
+                  setStatus('LIVE');
+                  setPublished(true);
+                }}
+                className="text-emerald-600 focus:ring-emerald-500"
+              />
+              <div>
+                <span className="font-black text-xs block">🟢 LIVE</span>
+                <span className="text-[10px] opacity-80 block">Ready to Watch & Sell</span>
+              </div>
+            </label>
+
+            <label
+              className={`p-3 rounded-xl border-2 flex items-center gap-2.5 cursor-pointer transition-all ${
+                status === 'UPCOMING'
+                  ? 'border-amber-500 bg-amber-500/10 text-amber-900 dark:text-amber-300 font-bold'
+                  : 'border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 text-slate-700 dark:text-slate-300 text-xs'
+              }`}
+            >
+              <input
+                type="radio"
+                name="newCourseStatus"
+                value="UPCOMING"
+                checked={status === 'UPCOMING'}
+                onChange={() => {
+                  setStatus('UPCOMING');
+                  setPublished(true);
+                }}
+                className="text-amber-600 focus:ring-amber-500"
+              />
+              <div>
+                <span className="font-black text-xs block">⏳ UPCOMING</span>
+                <span className="text-[10px] opacity-80 block">Videos Uploading / Pre-Launch</span>
+              </div>
+            </label>
+
+            <label
+              className={`p-3 rounded-xl border-2 flex items-center gap-2.5 cursor-pointer transition-all ${
+                status === 'DRAFT'
+                  ? 'border-slate-500 bg-slate-500/10 text-slate-900 dark:text-white font-bold'
+                  : 'border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 text-slate-700 dark:text-slate-300 text-xs'
+              }`}
+            >
+              <input
+                type="radio"
+                name="newCourseStatus"
+                value="DRAFT"
+                checked={status === 'DRAFT'}
+                onChange={() => {
+                  setStatus('DRAFT');
+                  setPublished(false);
+                }}
+                className="text-slate-600 focus:ring-slate-500"
+              />
+              <div>
+                <span className="font-black text-xs block">🔒 DRAFT</span>
+                <span className="text-[10px] opacity-80 block">Hidden from Public</span>
+              </div>
+            </label>
+          </div>
         </div>
 
         <div className="pt-4 border-t border-slate-100 dark:border-white/10 flex justify-end">

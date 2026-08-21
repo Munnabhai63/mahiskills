@@ -67,6 +67,8 @@ export async function GET(req: NextRequest) {
         reviewCount: course.reviews.length || 320,
         totalStudents: course.totalStudents,
         totalLessons,
+        status: course.status || 'LIVE',
+        isReadyToSell: course.isReadyToSell !== false,
       };
     });
 

@@ -63,12 +63,16 @@ export async function PUT(
       learningOutcomes,
       faqs,
       published,
+      status,
+      isReadyToSell,
     } = body;
 
     const discount =
       originalPrice && price
         ? Math.round(((Number(originalPrice) - Number(price)) / Number(originalPrice)) * 100)
         : null;
+
+    const courseStatus = status || (isReadyToSell === false ? 'UPCOMING' : 'LIVE');
 
     const updated = await prisma.course.update({
       where: { id },
@@ -85,6 +89,8 @@ export async function PUT(
         level,
         category,
         badge,
+        status: courseStatus,
+        isReadyToSell: courseStatus === 'LIVE' && isReadyToSell !== false,
         instructor,
         duration,
         requirements: typeof requirements === 'string' ? requirements : JSON.stringify(requirements || []),
@@ -98,6 +104,43 @@ export async function PUT(
   } catch (error) {
     console.error('Admin update course error:', error);
     return NextResponse.json({ error: 'Failed to update course' }, { status: 500 });
+  }
+}
+
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const auth = await requireAuth(['ADMIN']);
+    if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
+
+    const { id } = await params;
+    const body = await req.json();
+    const { status, isReadyToSell, published } = body;
+
+    const data: any = {};
+    if (status !== undefined) {
+      data.status = status;
+      data.isReadyToSell = status === 'LIVE';
+      data.published = status !== 'DRAFT';
+    }
+    if (isReadyToSell !== undefined) data.isReadyToSell = Boolean(isReadyToSell);
+    if (published !== undefined) data.published = Boolean(published);
+
+    const updated = await prisma.course.update({
+      where: { id },
+      data,
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: `Course "${updated.title}" status updated to ${updated.status}`,
+      course: updated,
+    });
+  } catch (error) {
+    console.error('Admin patch course error:', error);
+    return NextResponse.json({ error: 'Failed to patch course status' }, { status: 500 });
   }
 }
 

@@ -24,6 +24,13 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Course not found' }, { status: 404 });
       }
 
+      // Check if course is currently live and ready to sell
+      if (!course.isReadyToSell || course.status === 'UPCOMING' || !course.published) {
+        return NextResponse.json({
+          error: 'This course is currently in production and not yet open for enrollment. Please stay tuned!',
+        }, { status: 400 });
+      }
+
       // Check if user is already enrolled
       const existingEnrollment = await prisma.enrollment.findUnique({
         where: {

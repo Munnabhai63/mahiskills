@@ -17,6 +17,8 @@ import {
   ShieldCheck,
   ArrowRight,
   Sparkles,
+  Send,
+  AlertCircle,
 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
@@ -179,6 +181,19 @@ export default function CourseDetailPage() {
               {course.shortDescription}
             </p>
 
+            {/* In Production Banner if Upcoming */}
+            {(course.status === 'UPCOMING' || course.isReadyToSell === false) && (
+              <div className="p-4 sm:p-5 rounded-2xl bg-amber-500/10 border-2 border-amber-500/30 text-amber-900 dark:text-amber-300 space-y-2 shadow-xs">
+                <div className="flex items-center gap-2 font-black text-sm">
+                  <Clock className="w-5 h-5 text-amber-500 shrink-0" />
+                  <span>⏳ Masterclass In Production & Pre-Launch</span>
+                </div>
+                <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed">
+                  Munna Bhai is currently recording and uploading high-definition video masterclasses for this course. You can explore the full curriculum and roadmap below. Enrollments will open as soon as all modules are completed!
+                </p>
+              </div>
+            )}
+
             {/* Metrics */}
             <div className="flex flex-wrap items-center gap-6 text-sm text-slate-600 dark:text-slate-300 pt-2 border-y border-slate-100 dark:border-white/10 py-3">
               <div className="flex items-center gap-1.5 font-bold text-slate-900 dark:text-white">
@@ -249,64 +264,60 @@ export default function CourseDetailPage() {
               </div>
             </div>
 
-            <div className="space-y-3">
-              {course.modules?.map((mod: any, mIdx: number) => {
+            <div className="rounded-3xl bg-white dark:bg-[#0B1728] border border-slate-200 dark:border-white/10 overflow-hidden divide-y divide-slate-100 dark:divide-white/5 shadow-xs">
+              {course.modules?.map((module: any, mIdx: number) => {
                 const isOpen = openModuleIndex === mIdx;
                 return (
-                  <div
-                    key={mod.id}
-                    className="rounded-2xl bg-white dark:bg-[#0B1728] border border-slate-200 dark:border-white/10 overflow-hidden shadow-xs"
-                  >
+                  <div key={module.id || mIdx} className="overflow-hidden">
                     <button
                       onClick={() => setOpenModuleIndex(isOpen ? null : mIdx)}
-                      className="w-full p-4 sm:p-5 flex items-center justify-between gap-4 text-left bg-slate-50/80 dark:bg-slate-900/60 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
+                      className="w-full p-4 sm:p-5 flex items-center justify-between bg-slate-50/60 dark:bg-slate-900/40 hover:bg-slate-100/80 dark:hover:bg-white/5 transition-colors text-left"
                     >
-                      <div>
-                        <h4 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">{mod.title}</h4>
-                        <span className="text-xs text-slate-500 dark:text-slate-400">
-                          {mod.lessons?.length || 0} Lessons
+                      <div className="flex items-center gap-3">
+                        <span className="w-6 h-6 rounded-lg bg-[#D6A84F]/20 text-[#C49339] dark:text-[#F0C96A] text-xs font-bold flex items-center justify-center">
+                          {mIdx + 1}
                         </span>
+                        <h4 className="text-sm font-bold text-slate-950 dark:text-white">
+                          {module.title}
+                        </h4>
                       </div>
-                      <ChevronDown
-                        className={`w-5 h-5 text-slate-500 transition-transform duration-200 ${
-                          isOpen ? 'rotate-180 text-[#C49339] dark:text-[#F0C96A]' : ''
-                        }`}
-                      />
+                      <div className="flex items-center gap-3 text-xs text-slate-400">
+                        <span>{module.lessons?.length || 0} lessons</span>
+                        <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+                      </div>
                     </button>
 
                     {isOpen && (
-                      <div className="p-2 sm:p-3 divide-y divide-slate-100 dark:divide-white/5">
-                        {mod.lessons?.map((lesson: any) => (
+                      <div className="divide-y divide-slate-100 dark:divide-white/5 px-4 sm:px-5 py-2 bg-white dark:bg-[#0B1728]">
+                        {module.lessons?.map((lesson: any, lIdx: number) => (
                           <div
-                            key={lesson.id}
-                            className="p-3 sm:px-4 rounded-xl flex items-center justify-between gap-3 text-xs sm:text-sm hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
+                            key={lesson.id || lIdx}
+                            className="py-3 flex items-center justify-between text-xs text-slate-600 dark:text-slate-300"
                           >
-                            <div className="flex items-center gap-3 flex-1 min-w-0">
-                              <div className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-700 dark:text-slate-300 shrink-0">
-                                {lesson.isPreview || course.isEnrolled ? (
-                                  <Play className="w-3.5 h-3.5 text-[#D6A84F] fill-current" />
-                                ) : (
-                                  <Lock className="w-3.5 h-3.5 text-slate-400" />
-                                )}
-                              </div>
-                              <span className="text-slate-800 dark:text-slate-200 truncate font-medium">{lesson.title}</span>
+                            <div className="flex items-center gap-3">
+                              {lesson.isPreview ? (
+                                <Play className="w-4 h-4 text-[#C49339] dark:text-[#F0C96A]" />
+                              ) : (
+                                <Lock className="w-4 h-4 text-slate-400" />
+                              )}
+                              <span className="font-medium text-slate-900 dark:text-white">
+                                {lesson.title}
+                              </span>
                             </div>
 
-                            <div className="flex items-center gap-3 shrink-0">
+                            <div className="flex items-center gap-3">
                               {lesson.isPreview && (
                                 <button
                                   onClick={() => {
-                                    setSelectedPreviewVideo(
-                                      lesson.videoUrl || course.previewVideo || 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
-                                    );
+                                    setSelectedPreviewVideo(lesson.videoUrl || 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4');
                                     setVideoModalOpen(true);
                                   }}
-                                  className="px-2.5 py-1 rounded-md bg-[#D6A84F]/15 hover:bg-[#D6A84F]/25 text-[#C49339] dark:text-[#F0C96A] text-[11px] font-bold transition-colors"
+                                  className="text-[11px] font-bold text-[#C49339] dark:text-[#F0C96A] hover:underline"
                                 >
-                                  Free Preview
+                                  Preview
                                 </button>
                               )}
-                              <span className="text-xs text-slate-400">{lesson.duration}</span>
+                              <span className="text-slate-400 font-mono text-[11px]">{lesson.duration}</span>
                             </div>
                           </div>
                         ))}
@@ -371,7 +382,9 @@ export default function CourseDetailPage() {
                 )}
               </div>
               <p className="text-xs text-rose-500 font-semibold">
-                ⚡ Instant access upon enrollment
+                {course.status === 'UPCOMING' || course.isReadyToSell === false
+                  ? '⏳ Pre-Launch • Enrollments opening soon'
+                  : '⚡ Instant access upon enrollment'}
               </p>
             </div>
 
@@ -385,6 +398,26 @@ export default function CourseDetailPage() {
                   <Play className="w-4 h-4 fill-current" />
                   <span>Continue Learning LMS</span>
                 </Link>
+              ) : course.status === 'UPCOMING' || course.isReadyToSell === false ? (
+                <div className="space-y-2.5">
+                  <button
+                    disabled
+                    className="w-full py-3.5 rounded-xl bg-slate-100 dark:bg-white/10 text-slate-500 dark:text-slate-400 font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 border border-slate-300 dark:border-white/10 cursor-not-allowed"
+                  >
+                    <Clock className="w-4 h-4 text-amber-500" />
+                    <span>⏳ Enrollments Opening Soon</span>
+                  </button>
+
+                  <a
+                    href="https://t.me/mahiskills"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-3.5 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-md shadow-sky-500/20 transition-transform hover:scale-[1.02]"
+                  >
+                    <Send className="w-4 h-4" />
+                    <span>Join Telegram for Launch Alert</span>
+                  </a>
+                </div>
               ) : (
                 <>
                   <button

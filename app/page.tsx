@@ -442,6 +442,8 @@ export default function HomePage() {
               discount={course.discount}
               thumbnail={course.thumbnail}
               badge={course.badge}
+              status={course.status}
+              isReadyToSell={course.isReadyToSell}
               rating={course.rating}
               reviewCount={course.reviewCount}
               totalStudents={course.totalStudents}

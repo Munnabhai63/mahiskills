@@ -43,7 +43,9 @@ model Course {
   previewVideo     String?
   level            String   @default("All Levels") // Beginner, Intermediate, Advanced, All Levels
   category         String   @default("Growth & Marketing")
-  badge            String?  // Bestseller, New, Popular
+  badge            String?  // Bestseller, New, Popular, Hot
+  status           String   @default("LIVE") // LIVE (Ready to Sell & Watch), UPCOMING (Coming Soon / Uploading Videos), DRAFT (Hidden)
+  isReadyToSell    Boolean  @default(true)
   published        Boolean  @default(true)
   instructor       String   @default("Munna Bhai")
   instructorTitle  String   @default("Founder & Lead Mentor, Mahi Skills")

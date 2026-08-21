@@ -248,27 +248,84 @@ export default function EditCourseAdminPage() {
           </div>
         </div>
 
-        <div className="flex items-center justify-between pt-2">
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="coursePublished"
-              checked={course.published}
-              onChange={(e) => setCourse({ ...course, published: e.target.checked })}
-              className="w-4 h-4 rounded text-[#D6A84F]"
-            />
-            <label htmlFor="coursePublished" className="text-xs font-bold text-slate-800 dark:text-white cursor-pointer">
-              Published on Website
+        <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/10 space-y-3">
+          <label className="block text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">
+            Course Selling Status & Availability
+          </label>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <label
+              className={`p-3 rounded-xl border-2 flex items-center gap-2.5 cursor-pointer transition-all ${
+                (course.status === 'LIVE' || (!course.status && course.isReadyToSell !== false))
+                  ? 'border-emerald-500 bg-emerald-500/10 text-emerald-900 dark:text-emerald-300 font-bold'
+                  : 'border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 text-slate-700 dark:text-slate-300 text-xs'
+              }`}
+            >
+              <input
+                type="radio"
+                name="courseStatus"
+                value="LIVE"
+                checked={course.status === 'LIVE' || (!course.status && course.isReadyToSell !== false)}
+                onChange={() => setCourse({ ...course, status: 'LIVE', isReadyToSell: true, published: true })}
+                className="text-emerald-600 focus:ring-emerald-500"
+              />
+              <div>
+                <span className="font-black text-xs block">🟢 LIVE</span>
+                <span className="text-[10px] opacity-80 block">Ready to Watch & Sell</span>
+              </div>
+            </label>
+
+            <label
+              className={`p-3 rounded-xl border-2 flex items-center gap-2.5 cursor-pointer transition-all ${
+                course.status === 'UPCOMING' || course.isReadyToSell === false
+                  ? 'border-amber-500 bg-amber-500/10 text-amber-900 dark:text-amber-300 font-bold'
+                  : 'border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 text-slate-700 dark:text-slate-300 text-xs'
+              }`}
+            >
+              <input
+                type="radio"
+                name="courseStatus"
+                value="UPCOMING"
+                checked={course.status === 'UPCOMING' || course.isReadyToSell === false}
+                onChange={() => setCourse({ ...course, status: 'UPCOMING', isReadyToSell: false, published: true })}
+                className="text-amber-600 focus:ring-amber-500"
+              />
+              <div>
+                <span className="font-black text-xs block">⏳ UPCOMING</span>
+                <span className="text-[10px] opacity-80 block">Videos Uploading / Pre-Launch</span>
+              </div>
+            </label>
+
+            <label
+              className={`p-3 rounded-xl border-2 flex items-center gap-2.5 cursor-pointer transition-all ${
+                course.status === 'DRAFT' || course.published === false
+                  ? 'border-slate-500 bg-slate-500/10 text-slate-900 dark:text-white font-bold'
+                  : 'border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 text-slate-700 dark:text-slate-300 text-xs'
+              }`}
+            >
+              <input
+                type="radio"
+                name="courseStatus"
+                value="DRAFT"
+                checked={course.status === 'DRAFT' || course.published === false}
+                onChange={() => setCourse({ ...course, status: 'DRAFT', isReadyToSell: false, published: false })}
+                className="text-slate-600 focus:ring-slate-500"
+              />
+              <div>
+                <span className="font-black text-xs block">🔒 DRAFT</span>
+                <span className="text-[10px] opacity-80 block">Hidden from Public</span>
+              </div>
             </label>
           </div>
+        </div>
 
+        <div className="flex items-center justify-end pt-2">
           <button
             type="submit"
             disabled={isSaving}
-            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#D6A84F] to-[#C49339] text-white font-extrabold text-xs flex items-center gap-1.5 shadow-md shadow-[#D6A84F]/20"
+            className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#D6A84F] to-[#C49339] text-white font-extrabold text-xs flex items-center gap-1.5 shadow-md shadow-[#D6A84F]/20 cursor-pointer hover:scale-105 transition-all"
           >
             <Save className="w-4 h-4" />
-            <span>{isSaving ? 'Saving...' : 'Save Course Details'}</span>
+            <span>{isSaving ? 'Saving Changes...' : 'Save Course & Status'}</span>
           </button>
         </div>
       </form>

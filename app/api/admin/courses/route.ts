@@ -52,6 +52,8 @@ export async function POST(req: NextRequest) {
       learningOutcomes,
       faqs,
       published,
+      status,
+      isReadyToSell,
     } = body;
 
     if (!title || !slug || !price) {
@@ -64,6 +66,8 @@ export async function POST(req: NextRequest) {
     if (existing) {
       return NextResponse.json({ error: 'A course with this slug already exists' }, { status: 409 });
     }
+
+    const courseStatus = status || (isReadyToSell === false ? 'UPCOMING' : 'LIVE');
 
     const course = await prisma.course.create({
       data: {
@@ -79,6 +83,8 @@ export async function POST(req: NextRequest) {
         level: level || 'All Levels',
         category: category || 'Digital Growth',
         badge: badge || null,
+        status: courseStatus,
+        isReadyToSell: courseStatus === 'LIVE' && isReadyToSell !== false,
         instructor: instructor || 'Munna Bhai',
         duration: duration || '10+ Hours',
         requirements: typeof requirements === 'string' ? requirements : JSON.stringify(requirements || []),
