@@ -3,7 +3,10 @@ import prisma from '@/lib/prisma';
 
 export async function POST(req: NextRequest) {
   try {
-    const { code, cartAmount } = await req.json();
+    const body = await req.json();
+    const { code } = body;
+    const rawAmount = body.cartAmount ?? body.cartTotal ?? body.amount ?? 0;
+    const subtotal = Number(rawAmount) || 0;
 
     if (!code || typeof code !== 'string') {
       return NextResponse.json({ error: 'Please enter a coupon code' }, { status: 400 });
@@ -26,7 +29,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'This coupon usage limit has been reached' }, { status: 400 });
     }
 
-    const subtotal = Number(cartAmount) || 0;
     if (subtotal < coupon.minPurchase) {
       return NextResponse.json(
         { error: `Minimum purchase amount of ₹${coupon.minPurchase} required for this coupon` },
@@ -47,6 +49,7 @@ export async function POST(req: NextRequest) {
     discountAmount = Math.min(discountAmount, subtotal);
 
     return NextResponse.json({
+      valid: true,
       code: coupon.code,
       discountType: coupon.discountType,
       discountValue: coupon.discountValue,
