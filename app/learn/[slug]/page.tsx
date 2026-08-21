@@ -37,6 +37,7 @@ export default function CourseLearningPlayer() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [certificateData, setCertificateData] = useState<any | null>(null);
   const [showCertModal, setShowCertModal] = useState(false);
+  const [showPracticeModal, setShowPracticeModal] = useState(false);
 
   // Load course and progress
   useEffect(() => {
@@ -122,6 +123,9 @@ export default function CourseLearningPlayer() {
               origin: { y: 0.6 },
             });
           } catch {}
+        } else if (newStatus) {
+          // Show practice prompt for non-final lessons
+          setShowPracticeModal(true);
         }
       }
     } catch {
@@ -362,8 +366,104 @@ export default function CourseLearningPlayer() {
                 </div>
               </div>
             )}
+
+            {/* 🎯 Practice & Reflection Card */}
+            <div className="p-6 rounded-2xl bg-gradient-to-br from-[#0B1728] to-[#112240] border border-[#D6A84F]/20 space-y-4">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#D6A84F] to-[#C49339] flex items-center justify-center shrink-0">
+                  <span className="text-lg">🎯</span>
+                </div>
+                <div className="space-y-1.5">
+                  <h4 className="text-sm font-bold text-white">Practice Before Moving Forward</h4>
+                  <p className="text-xs text-[#94A3B8] leading-relaxed">
+                    Real learning happens when you apply what you've watched. Take 15-20 minutes to practice the concepts from this lesson before moving to the next one.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="p-3 rounded-xl bg-[#07111F] border border-white/5 text-center space-y-1">
+                  <span className="text-lg">📝</span>
+                  <p className="text-[10px] text-[#F0C96A] font-bold">STEP 1</p>
+                  <p className="text-[11px] text-white font-medium">Note down 3 key takeaways from this lesson</p>
+                </div>
+                <div className="p-3 rounded-xl bg-[#07111F] border border-white/5 text-center space-y-1">
+                  <span className="text-lg">💻</span>
+                  <p className="text-[10px] text-[#F0C96A] font-bold">STEP 2</p>
+                  <p className="text-[11px] text-white font-medium">Try it yourself — apply what you learned</p>
+                </div>
+                <div className="p-3 rounded-xl bg-[#07111F] border border-white/5 text-center space-y-1">
+                  <span className="text-lg">✅</span>
+                  <p className="text-[10px] text-[#F0C96A] font-bold">STEP 3</p>
+                  <p className="text-[11px] text-white font-medium">Mark as complete & move to next lesson</p>
+                </div>
+              </div>
+
+              <p className="text-[10px] text-[#64748B] italic text-center">
+                💡 Students who practice after each lesson are 3x more likely to succeed!
+              </p>
+            </div>
           </div>
         </div>
+
+      {/* 🎉 Practice Celebration Modal */}
+      {showPracticeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="max-w-md w-full p-7 rounded-3xl bg-[#0B1728] border-2 border-[#D6A84F]/40 shadow-2xl shadow-[#D6A84F]/10 text-center space-y-5 animate-in zoom-in-95 duration-200">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#F0C96A] via-[#D6A84F] to-[#B3862D] text-[#05080D] flex items-center justify-center mx-auto shadow-lg">
+              <span className="text-3xl">🌟</span>
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-xl font-black text-white">
+                Great Job! Lesson Complete 🎉
+              </h3>
+              <p className="text-xs text-[#94A3B8] leading-relaxed">
+                You've finished <strong className="text-[#F0C96A]">{currentLesson?.title}</strong>. Before jumping to the next lesson, take a moment to practice!
+              </p>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-[#07111F] border border-[#D6A84F]/20 space-y-3 text-left">
+              <p className="text-xs font-bold text-[#F0C96A]">✨ Quick Practice Checklist:</p>
+              <ul className="space-y-2 text-xs text-[#94A3B8]">
+                <li className="flex items-start gap-2">
+                  <span className="text-[#D6A84F] mt-0.5">→</span>
+                  <span>Did you understand the core concept? If not, re-watch key parts.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#D6A84F] mt-0.5">→</span>
+                  <span>Open your tools and try implementing what was taught.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#D6A84F] mt-0.5">→</span>
+                  <span>Note any questions — you can ask in your 1:1 session!</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-1">
+              {nextLesson && (
+                <button
+                  onClick={() => {
+                    setShowPracticeModal(false);
+                    setCurrentLesson(nextLesson);
+                  }}
+                  className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-[#D6A84F] to-[#C49339] text-[#05080D] font-extrabold text-xs flex items-center justify-center gap-1.5 hover:shadow-lg hover:shadow-[#D6A84F]/30 transition-all"
+                >
+                  <span>Continue to Next Lesson</span>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              )}
+              <button
+                onClick={() => setShowPracticeModal(false)}
+                className="w-full sm:w-auto px-6 py-3 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs transition-colors"
+              >
+                Practice First 💪
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
         {/* Right Modules & Lessons Sidebar */}
         <aside
