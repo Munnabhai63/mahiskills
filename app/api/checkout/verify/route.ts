@@ -26,25 +26,58 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         message: 'Order already processed',
         orderNumber: order.orderNumber,
-        redirectUrl: order.course ? `/dashboard` : '/dashboard',
+        redirectUrl: '/dashboard',
       });
     }
 
-    // Verify Payment — skip Razorpay signature for UPI QR payments (UTR-based)
+    // Check if UPI QR payment (manual UTR-based)
     const isUpiPayment = paymentMethod === 'PHONEPE_UPI_QR' || razorpaySignature === 'upi_qr_verified';
 
-    let isValid = false;
+    const transactionId = razorpayPaymentId || `TXN-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
+
     if (isUpiPayment) {
-      // UPI QR payments are verified by UTR number — no Razorpay signature needed
-      isValid = true;
-    } else {
-      // Standard Razorpay payment — verify cryptographic signature
-      isValid = verifyPaymentSignature(
-        razorpayOrderId || order.razorpayOrderId || '',
-        razorpayPaymentId || 'demo_payment',
-        razorpaySignature || 'simulated_sig_success'
-      );
+      // UPI QR Payment → Set to PENDING_REVIEW (admin must approve)
+      await prisma.$transaction(async (tx) => {
+        await tx.payment.create({
+          data: {
+            orderId: order.id,
+            gateway: 'UPI_QR',
+            transactionId,
+            signature: null,
+            status: 'PENDING',
+            payload: JSON.stringify({
+              utrNumber: razorpayPaymentId,
+              paymentMethod: 'PHONEPE_UPI_QR',
+              submittedAt: new Date().toISOString(),
+            }),
+          },
+        });
+
+        await tx.order.update({
+          where: { id: order.id },
+          data: {
+            status: 'PENDING_REVIEW',
+            paymentMethod: 'PHONEPE_UPI_QR',
+            razorpayPaymentId: transactionId,
+          },
+        });
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: 'Payment submitted! Your UTR is under review. You will be notified once approved.',
+        orderNumber: order.orderNumber,
+        redirectUrl: '/dashboard',
+        pendingReview: true,
+      });
     }
+
+    // Standard Razorpay payment — verify cryptographic signature
+    const isValid = verifyPaymentSignature(
+      razorpayOrderId || order.razorpayOrderId || '',
+      razorpayPaymentId || 'demo_payment',
+      razorpaySignature || 'simulated_sig_success'
+    );
 
     if (!isValid) {
       await prisma.order.update({
@@ -54,9 +87,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Payment signature verification failed' }, { status: 400 });
     }
 
-    const transactionId = razorpayPaymentId || `TXN-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
-
-    // Create Payment record & update Order
+    // Razorpay verified → instant enrollment
     await prisma.$transaction(async (tx) => {
       await tx.payment.create({
         data: {
@@ -82,7 +113,6 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      // Update coupon usage if applicable
       if (order.couponCode) {
         await tx.coupon.update({
           where: { code: order.couponCode },
@@ -90,31 +120,20 @@ export async function POST(req: NextRequest) {
         }).catch(() => {});
       }
 
-      // If course order, automatically enroll student
       if (order.courseId) {
         await tx.enrollment.upsert({
           where: {
-            userId_courseId: {
-              userId: user.id,
-              courseId: order.courseId,
-            },
+            userId_courseId: { userId: user.id, courseId: order.courseId },
           },
-          create: {
-            userId: user.id,
-            courseId: order.courseId,
-            progressPercent: 0,
-          },
+          create: { userId: user.id, courseId: order.courseId, progressPercent: 0 },
           update: {},
         });
-
-        // Increment course student count
         await tx.course.update({
           where: { id: order.courseId },
           data: { totalStudents: { increment: 1 } },
         });
       }
 
-      // If 1:1 session order, confirm session booking
       if (order.sessionId) {
         await tx.sessionBooking.update({
           where: { id: order.sessionId },

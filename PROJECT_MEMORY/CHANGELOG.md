@@ -1,13 +1,12 @@
 # MAHI SKILLS — Project Changelog
 
-## [2026-08-20] — Native PhonePe Style Large QR Payment Card
+## [2026-08-21] — Luxury Executive Handwritten Signature on Verifiable Certificates
 
 ### Added & Updated:
-1. **Clean Cropped QR Scanner**:
-   - Cropped away all empty black background space from the bottom of the PhonePe screenshot.
-   - Preserved PhonePe logo header, clean large QR code scanner, and "Mahipal Choudhary".
-2. **Native Mobile Payment UI**:
-   - Styled `UpiPaymentModal` with rich PhonePe purple & luxury gold accents.
-   - Large, crisp, centered QR code for effortless camera scanning on phone screens.
+1. **Executive Founder Signature (`components/FounderSignature.tsx`)**:
+   - Replaced plain text font with a luxury, fluid, handwritten digital pen signature for **Munna Bhai / Mahipal Choudhary**.
+   - Includes calligraphy pen strokes, executive flourish tail, gold ink accents, and verification underline.
+2. **Applied on Verifiable Certificates**:
+   - Updated `app/verify-certificate/[id]/page.tsx` with the new digital signature.
 3. **Pushed to GitHub**:
-   - Commit `e01fd47` pushed to `https://github.com/Munnabhai63/mahiskills.git`.
+   - Commit `3294fed` pushed to `https://github.com/Munnabhai63/mahiskills.git`.

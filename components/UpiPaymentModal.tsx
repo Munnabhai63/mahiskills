@@ -92,7 +92,14 @@ export default function UpiPaymentModal({
       const data = await res.json();
 
       if (res.ok && data.success) {
-        onPaymentSuccess(cleanUtr);
+        if (data.pendingReview) {
+          // UPI payment — show under review message, redirect to dashboard
+          setErrorMessage('');
+          alert('✅ Payment submitted successfully!\n\nYour UTR number is under review. You will be notified via WhatsApp once approved.\n\nRedirecting to your dashboard...');
+          window.location.href = '/dashboard';
+        } else {
+          onPaymentSuccess(cleanUtr);
+        }
       } else {
         setErrorMessage(data.error || 'Failed to verify transaction. Please check the UTR number or contact support.');
       }
