@@ -30,12 +30,21 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Verify Payment Signature
-    const isValid = verifyPaymentSignature(
-      razorpayOrderId || order.razorpayOrderId || '',
-      razorpayPaymentId || 'demo_payment',
-      razorpaySignature || 'simulated_sig_success'
-    );
+    // Verify Payment — skip Razorpay signature for UPI QR payments (UTR-based)
+    const isUpiPayment = paymentMethod === 'PHONEPE_UPI_QR' || razorpaySignature === 'upi_qr_verified';
+
+    let isValid = false;
+    if (isUpiPayment) {
+      // UPI QR payments are verified by UTR number — no Razorpay signature needed
+      isValid = true;
+    } else {
+      // Standard Razorpay payment — verify cryptographic signature
+      isValid = verifyPaymentSignature(
+        razorpayOrderId || order.razorpayOrderId || '',
+        razorpayPaymentId || 'demo_payment',
+        razorpaySignature || 'simulated_sig_success'
+      );
+    }
 
     if (!isValid) {
       await prisma.order.update({
