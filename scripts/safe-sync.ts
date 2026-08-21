@@ -141,6 +141,64 @@ async function safeSync() {
         },
       ],
     },
+    {
+      title: 'TeraBox Unlimited Earning Method — $100+/Day Blueprint',
+      slug: 'terabox-earning-method',
+      shortDescription: 'Master the TeraBox Webmaster Partner program — upload & share files, drive massive viral traffic from Telegram & social media, and earn $100+/day passively.',
+      description: 'The complete step-by-step masterclass on earning consistent daily income with TeraBox. Learn how to set up your Webmaster Partner account, find high-demand viral content, automate Telegram & social media traffic funnels, maximize your CPM per 10,000 views, and withdraw your dollar payouts directly to bank or crypto with 100% working proof.',
+      price: 4999, originalPrice: 14999, discount: 66,
+      thumbnail: '/images/terabox-earning-method.jpg',
+      previewVideo: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackSeeTheWorld.mp4',
+      level: 'Beginner to Advanced', category: 'File Sharing & Cloud Monetization', badge: 'POPULAR', duration: '5+ Hours', rating: 4.9, totalStudents: 240,
+      requirements: JSON.stringify([
+        'Smartphone or computer with internet connection',
+        'Active Telegram account',
+        'No video creation or camera presence required'
+      ]),
+      learningOutcomes: JSON.stringify([
+        'Official TeraBox Webmaster Partner registration & setup',
+        'High-converting niche selection (software, templates, study material, media)',
+        'Automated Telegram channel creation & viral traffic growth',
+        'Advanced link cloaking & social media traffic loops (Shorts, Reels, Pinterest)',
+        'Multi-account management and daily $100+ revenue scaling',
+        'Direct withdrawal methods (Bank Transfer, USDT/Crypto, UPI)'
+      ]),
+      faqs: JSON.stringify([
+        { q: 'Do I need to create my own videos?', a: 'No! TeraBox pays you for file downloads, link clicks, and new user signups. Zero video recording required.' },
+        { q: 'How fast can I start earning?', a: 'Once you set up your automated Telegram traffic funnel, you can start seeing earnings within 24 to 48 hours.' },
+        { q: 'Is this method 100% genuine and working?', a: 'Yes! TeraBox is a global cloud platform with official Webmaster payout programs.' }
+      ]),
+      modules: [
+        {
+          title: 'Module 1: TeraBox Partner Program Foundation',
+          lessons: [
+            { title: 'TeraBox Monetization Ecosystem & Earning Models', duration: '20m', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackSeeTheWorld.mp4', isPreview: true },
+            { title: 'Registering as an Official Webmaster Partner', duration: '30m', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4', isPreview: false },
+          ],
+        },
+        {
+          title: 'Module 2: High-Demand Viral Content Selection',
+          lessons: [
+            { title: 'Top 7 Evergreen Niches for Massive Downloads', duration: '35m', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4', isPreview: false },
+            { title: 'Sourcing Free High-Value Files & Cloud Organization', duration: '40m', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WhatCarCanYouGetForAGrand.mp4', isPreview: false },
+          ],
+        },
+        {
+          title: 'Module 3: Unlimited Traffic Generation Engine',
+          lessons: [
+            { title: 'Building Automated High-Traffic Telegram Channels', duration: '50m', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4', isPreview: false },
+            { title: 'Social Media Traffic Funnels (Shorts, Reels, Pinterest)', duration: '45m', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4', isPreview: false },
+          ],
+        },
+        {
+          title: 'Module 4: Scaling to $100+/Day & Direct Withdrawals',
+          lessons: [
+            { title: 'Revenue Multipliers: Premium Signups vs CPM Plays', duration: '35m', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4', isPreview: false },
+            { title: 'Live Withdrawal Walkthrough & Multi-Account Safety', duration: '30m', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyBlazes.mp4', isPreview: false },
+          ],
+        },
+      ],
+    },
   ];
 
   for (const c of allCourses) {

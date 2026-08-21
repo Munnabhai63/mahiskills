@@ -209,6 +209,15 @@ export default function Footer() {
               </li>
               <li>
                 <Link
+                  href="/courses/terabox-earning-method"
+                  className="hover:text-[#C49339] dark:text-[#F0C96A] font-semibold transition-colors flex items-center gap-1.5"
+                >
+                  <span>TeraBox Unlimited Earning</span>
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-sky-500 text-white font-bold">HOT</span>
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/courses"
                   className="hover:text-[#C49339] dark:hover:text-[#F0C96A] transition-colors"
                 >
