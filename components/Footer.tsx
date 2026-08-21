@@ -183,7 +183,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Top Courses */}
+          {/* Top Programs */}
           <div className="flex flex-col gap-3">
             <h4 className="text-slate-900 dark:text-white font-bold text-xs uppercase tracking-wider">
               Top Programs
@@ -194,45 +194,37 @@ export default function Footer() {
                   href="/courses/whop-clipping-campaign-guide"
                   className="hover:text-[#C49339] dark:text-[#F0C96A] font-semibold transition-colors flex items-center gap-1.5"
                 >
-                  <span>Whop Clipping Guide</span>
-                  <span className="text-[9px] px-1 py-0.2 rounded bg-red-500 text-white font-bold">NEW</span>
+                  <span>Whop Clipping — A-Z Guide</span>
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-red-500 text-white font-bold">NEW</span>
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/courses/instagram-growth-mastery"
+                  href="/courses"
                   className="hover:text-[#C49339] dark:hover:text-[#F0C96A] transition-colors"
                 >
-                  Instagram Growth Mastery
+                  Explore All Masterclasses →
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/courses/youtube-growth-monetization"
+                  href="/session"
                   className="hover:text-[#C49339] dark:hover:text-[#F0C96A] transition-colors"
                 >
-                  YouTube Growth & Monetization
+                  Book 1:1 Personal Session
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/courses/whatsapp-marketing-mastery"
+                  href="/community"
                   className="hover:text-[#C49339] dark:hover:text-[#F0C96A] transition-colors"
                 >
-                  WhatsApp Marketing Mastery
+                  Student Community
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/courses/freelancing-online-earning"
-                  className="hover:text-[#C49339] dark:hover:text-[#F0C96A] transition-colors"
-                >
-                  Freelancing & Global Earning
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/verify-certificate/MS-CERT-2026-IG-0042"
+                  href="/verify-certificate"
                   className="hover:text-[#C49339] dark:hover:text-[#F0C96A] transition-colors flex items-center gap-1"
                 >
                   <ShieldCheck className="w-3.5 h-3.5 text-[#D6A84F]" />
