@@ -20,6 +20,9 @@ import {
   ArrowRight,
   Bell,
   Sparkles,
+  Star,
+  X,
+  MessageSquare,
 } from 'lucide-react';
 
 function StudentDashboardContent() {
@@ -39,6 +42,73 @@ function StudentDashboardContent() {
   const [newPassword, setNewPassword] = useState('');
   const [profileMsg, setProfileMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+
+  // Student Course Review State
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [selectedCourseForReview, setSelectedCourseForReview] = useState<any>(null);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState('');
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [reviewFeedback, setReviewFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  const openStudentReviewModal = async (enr: any) => {
+    const courseId = enr.courseId || enr.course?.id || enr.id;
+    const courseTitle = enr.title || enr.course?.title || 'Course';
+    setSelectedCourseForReview({ id: courseId, title: courseTitle });
+    setReviewRating(5);
+    setReviewComment('');
+    setReviewFeedback(null);
+    setReviewModalOpen(true);
+
+    try {
+      const res = await fetch(`/api/reviews?courseId=${courseId}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.review) {
+          setReviewRating(data.review.rating || 5);
+          setReviewComment(data.review.comment || '');
+        }
+      }
+    } catch {}
+  };
+
+  const handleSubmitStudentReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedCourseForReview?.id) return;
+    if (!reviewComment.trim()) {
+      setReviewFeedback({ type: 'error', text: 'Please write a brief review comment' });
+      return;
+    }
+
+    setIsSubmittingReview(true);
+    setReviewFeedback(null);
+
+    try {
+      const res = await fetch('/api/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          courseId: selectedCourseForReview.id,
+          rating: reviewRating,
+          comment: reviewComment.trim(),
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setReviewFeedback({ type: 'success', text: 'Thank you! Your review has been submitted successfully.' });
+        setTimeout(() => {
+          setReviewModalOpen(false);
+        }, 1500);
+      } else {
+        setReviewFeedback({ type: 'error', text: data.error || 'Failed to submit review' });
+      }
+    } catch {
+      setReviewFeedback({ type: 'error', text: 'Something went wrong. Please try again.' });
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  };
 
   useEffect(() => {
     const tabFromUrl = searchParams.get('tab');
@@ -260,14 +330,22 @@ function StudentDashboardContent() {
                       </div>
                     </div>
 
-                    <div className="p-5 pt-0 border-t border-slate-100 dark:border-white/5 mt-2">
+                    <div className="p-5 pt-0 border-t border-slate-100 dark:border-white/5 mt-2 flex items-center gap-2">
                       <Link
                         href={`/learn/${cSlug}`}
-                        className="w-full py-2.5 rounded-xl bg-slate-900 dark:bg-[#D6A84F] hover:bg-[#D6A84F] dark:hover:bg-[#C49339] text-white dark:text-slate-950 font-bold text-xs flex items-center justify-center gap-2 transition-colors shadow-xs"
+                        className="flex-1 py-2.5 rounded-xl bg-slate-900 dark:bg-[#D6A84F] hover:bg-[#D6A84F] dark:hover:bg-[#C49339] text-white dark:text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors shadow-xs"
                       >
-                        <Play className="w-4 h-4 fill-current" />
-                        <span>{progress === 100 ? 'Review Course' : 'Continue Learning'}</span>
+                        <Play className="w-3.5 h-3.5 fill-current" />
+                        <span>{progress === 100 ? 'Review LMS' : 'Continue'}</span>
                       </Link>
+                      <button
+                        onClick={() => openStudentReviewModal(enr)}
+                        className="px-3.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/15 text-slate-800 dark:text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-colors border border-slate-200 dark:border-white/10 shrink-0"
+                        title="Rate & Review Course"
+                      >
+                        <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                        <span>Review</span>
+                      </button>
                     </div>
                   </div>
                 );
@@ -582,6 +660,105 @@ function StudentDashboardContent() {
                 ))
               )}
             </div>
+          </div>
+        </div>
+      )}
+      {/* Student Course Review Modal */}
+      {reviewModalOpen && selectedCourseForReview && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="max-w-md w-full p-6 sm:p-8 rounded-3xl bg-white dark:bg-[#0B1728] border-2 border-slate-200 dark:border-[#D6A84F]/40 shadow-2xl space-y-5 relative">
+            <button
+              onClick={() => setReviewModalOpen(false)}
+              className="absolute top-5 right-5 p-1.5 rounded-full bg-slate-100 dark:bg-white/10 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#D6A84F]/10 text-[#C49339] dark:text-[#F0C96A] text-[11px] font-bold">
+                <Sparkles className="w-3 h-3" />
+                <span>STUDENT COURSE FEEDBACK</span>
+              </div>
+              <h2 className="text-xl font-black text-slate-950 dark:text-white">
+                Rate & Review Course
+              </h2>
+              <p className="text-xs font-bold text-[#C49339] dark:text-[#F0C96A] truncate">
+                {selectedCourseForReview.title}
+              </p>
+            </div>
+
+            {reviewFeedback && (
+              <div
+                className={`p-3 rounded-xl text-xs font-semibold flex items-center gap-2 ${
+                  reviewFeedback.type === 'success'
+                    ? 'bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300'
+                    : 'bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300'
+                }`}
+              >
+                {reviewFeedback.type === 'success' && <CheckCircle2 className="w-4 h-4 shrink-0" />}
+                <span>{reviewFeedback.text}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmitStudentReview} className="space-y-4">
+              {/* Star Rating */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Your Rating: <span className="text-[#C49339] dark:text-[#F0C96A] font-extrabold">{reviewRating} / 5 Stars</span>
+                </label>
+                <div className="flex items-center gap-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      type="button"
+                      key={star}
+                      onClick={() => setReviewRating(star)}
+                      className="p-1 focus:outline-none transition-transform hover:scale-110"
+                    >
+                      <Star
+                        className={`w-7 h-7 ${
+                          star <= reviewRating
+                            ? 'text-amber-400 fill-amber-400'
+                            : 'text-slate-300 dark:text-slate-600'
+                        }`}
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Review Comment */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Share Your Experience / Feedback *
+                </label>
+                <textarea
+                  value={reviewComment}
+                  onChange={(e) => setReviewComment(e.target.value)}
+                  rows={4}
+                  placeholder="How was the course? What did you learn from Munna Bhai? How did it help you build your income or skills?"
+                  className="w-full p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white text-xs leading-relaxed focus:border-[#D6A84F] focus:outline-none resize-none"
+                  required
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-2 flex items-center justify-end gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setReviewModalOpen(false)}
+                  className="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 text-xs font-bold transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingReview}
+                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#D6A84F] to-[#C49339] text-white font-extrabold text-xs shadow-md shadow-[#D6A84F]/20 hover:scale-[1.01] transition-all disabled:opacity-50"
+                >
+                  {isSubmittingReview ? 'Submitting...' : 'Submit Review'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

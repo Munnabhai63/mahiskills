@@ -18,6 +18,7 @@ import {
   Sparkles,
   ArrowLeft,
   ShieldAlert,
+  Star,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useAuth } from '@/context/AuthContext';
@@ -38,6 +39,68 @@ export default function CourseLearningPlayer() {
   const [certificateData, setCertificateData] = useState<any | null>(null);
   const [showCertModal, setShowCertModal] = useState(false);
   const [showPracticeModal, setShowPracticeModal] = useState(false);
+  const [showLmsReviewModal, setShowLmsReviewModal] = useState(false);
+  const [lmsRating, setLmsRating] = useState(5);
+  const [lmsComment, setLmsComment] = useState('');
+  const [isSubmittingLmsReview, setIsSubmittingLmsReview] = useState(false);
+  const [lmsReviewFeedback, setLmsReviewFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  const openLmsReview = async () => {
+    if (!course?.id) return;
+    setLmsRating(5);
+    setLmsComment('');
+    setLmsReviewFeedback(null);
+    setShowLmsReviewModal(true);
+
+    try {
+      const res = await fetch(`/api/reviews?courseId=${course.id}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.review) {
+          setLmsRating(data.review.rating || 5);
+          setLmsComment(data.review.comment || '');
+        }
+      }
+    } catch {}
+  };
+
+  const handleLmsReviewSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!course?.id) return;
+    if (!lmsComment.trim()) {
+      setLmsReviewFeedback({ type: 'error', text: 'Please write a review comment' });
+      return;
+    }
+
+    setIsSubmittingLmsReview(true);
+    setLmsReviewFeedback(null);
+
+    try {
+      const res = await fetch('/api/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          courseId: course.id,
+          rating: lmsRating,
+          comment: lmsComment.trim(),
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setLmsReviewFeedback({ type: 'success', text: 'Thank you for your feedback! Review submitted.' });
+        setTimeout(() => {
+          setShowLmsReviewModal(false);
+        }, 1500);
+      } else {
+        setLmsReviewFeedback({ type: 'error', text: data.error || 'Failed to submit review' });
+      }
+    } catch {
+      setLmsReviewFeedback({ type: 'error', text: 'Something went wrong. Please try again.' });
+    } finally {
+      setIsSubmittingLmsReview(false);
+    }
+  };
 
   // Load course and progress
   useEffect(() => {
@@ -229,6 +292,15 @@ export default function CourseLearningPlayer() {
             </div>
             <span className="text-xs font-bold text-[#F0C96A]">{progressPercent}% Complete</span>
           </div>
+
+          <button
+            onClick={openLmsReview}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-200 hover:text-white text-xs font-bold border border-white/10 hover:border-[#D6A84F]/40 transition-colors"
+            title="Rate & Review Course"
+          >
+            <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+            <span className="hidden sm:inline">Review</span>
+          </button>
 
           {certificateData && (
             <Link
@@ -559,6 +631,105 @@ export default function CourseLearningPlayer() {
                 Back to Lessons
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      {/* LMS Student Course Review Modal */}
+      {showLmsReviewModal && course && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="max-w-md w-full p-6 sm:p-8 rounded-3xl bg-[#0B1728] border-2 border-[#D6A84F]/40 shadow-2xl space-y-5 relative text-left">
+            <button
+              onClick={() => setShowLmsReviewModal(false)}
+              className="absolute top-5 right-5 p-1.5 rounded-full bg-white/10 text-slate-400 hover:text-white transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#D6A84F]/20 text-[#F0C96A] text-[11px] font-bold">
+                <Sparkles className="w-3 h-3" />
+                <span>COURSE FEEDBACK & RATING</span>
+              </div>
+              <h2 className="text-xl font-black text-white">
+                Review this Masterclass
+              </h2>
+              <p className="text-xs font-bold text-[#F0C96A] truncate">
+                {course.title}
+              </p>
+            </div>
+
+            {lmsReviewFeedback && (
+              <div
+                className={`p-3 rounded-xl text-xs font-semibold flex items-center gap-2 ${
+                  lmsReviewFeedback.type === 'success'
+                    ? 'bg-emerald-950/60 border border-emerald-500 text-emerald-300'
+                    : 'bg-rose-950/60 border border-rose-500 text-rose-300'
+                }`}
+              >
+                {lmsReviewFeedback.type === 'success' && <CheckCircle2 className="w-4 h-4 shrink-0" />}
+                <span>{lmsReviewFeedback.text}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleLmsReviewSubmit} className="space-y-4">
+              {/* Star Rating */}
+              <div>
+                <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                  Your Rating: <span className="text-[#F0C96A] font-extrabold">{lmsRating} / 5 Stars</span>
+                </label>
+                <div className="flex items-center gap-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      type="button"
+                      key={star}
+                      onClick={() => setLmsRating(star)}
+                      className="p-1 focus:outline-none transition-transform hover:scale-110"
+                    >
+                      <Star
+                        className={`w-7 h-7 ${
+                          star <= lmsRating
+                            ? 'text-amber-400 fill-amber-400'
+                            : 'text-slate-600'
+                        }`}
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Review Comment */}
+              <div>
+                <label className="block text-xs font-bold text-slate-300 mb-1">
+                  Share Your Experience / Feedback *
+                </label>
+                <textarea
+                  value={lmsComment}
+                  onChange={(e) => setLmsComment(e.target.value)}
+                  rows={4}
+                  placeholder="How was the video quality? What was your biggest breakthrough? How did Munna Bhai's guidance help you?"
+                  className="w-full p-3.5 rounded-xl bg-slate-900 border border-white/10 text-white text-xs leading-relaxed focus:border-[#D6A84F] focus:outline-none resize-none"
+                  required
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-2 flex items-center justify-end gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setShowLmsReviewModal(false)}
+                  className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-slate-300 text-xs font-bold transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingLmsReview}
+                  className="px-6 py-2.5 rounded-xl bg-gold-gradient text-[#05080D] font-extrabold text-xs shadow-md hover:scale-[1.01] transition-all disabled:opacity-50"
+                >
+                  {isSubmittingLmsReview ? 'Submitting...' : 'Submit Review'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

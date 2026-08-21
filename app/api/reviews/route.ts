@@ -9,6 +9,43 @@ const reviewSchema = z.object({
   comment: z.string().min(5, 'Review must be at least 5 characters'),
 });
 
+export async function GET(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const courseId = searchParams.get('courseId');
+    const user = await getCurrentUser();
+
+    if (courseId && user) {
+      const existingReview = await prisma.review.findFirst({
+        where: {
+          courseId,
+          userId: user.id,
+        },
+      });
+      return NextResponse.json({ review: existingReview });
+    }
+
+    if (courseId) {
+      const reviews = await prisma.review.findMany({
+        where: {
+          courseId,
+          isApproved: true,
+        },
+        include: {
+          user: { select: { name: true, avatar: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+      return NextResponse.json({ reviews });
+    }
+
+    return NextResponse.json({ error: 'courseId is required' }, { status: 400 });
+  } catch (error) {
+    console.error('Fetch reviews error:', error);
+    return NextResponse.json({ error: 'Failed to fetch reviews' }, { status: 500 });
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const user = await getCurrentUser();
@@ -42,18 +79,41 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const review = await prisma.review.create({
-      data: {
+    // Check if user already submitted a review for this course
+    const existing = await prisma.review.findFirst({
+      where: {
         userId: user.id,
         courseId,
-        rating,
-        comment,
-        isApproved: true,
-      },
-      include: {
-        user: { select: { name: true, avatar: true } },
       },
     });
+
+    let review;
+    if (existing) {
+      review = await prisma.review.update({
+        where: { id: existing.id },
+        data: {
+          rating,
+          comment: comment.trim(),
+          isApproved: true,
+        },
+        include: {
+          user: { select: { name: true, avatar: true } },
+        },
+      });
+    } else {
+      review = await prisma.review.create({
+        data: {
+          userId: user.id,
+          courseId,
+          rating,
+          comment: comment.trim(),
+          isApproved: true,
+        },
+        include: {
+          user: { select: { name: true, avatar: true } },
+        },
+      });
+    }
 
     return NextResponse.json({
       success: true,
@@ -65,3 +125,4 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Failed to submit review' }, { status: 500 });
   }
 }
+
