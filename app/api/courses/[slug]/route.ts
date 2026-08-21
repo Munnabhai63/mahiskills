@@ -51,21 +51,17 @@ export async function GET(
     let progressPercent = 0;
 
     if (user) {
-      if (user.role === 'ADMIN') {
-        isEnrolled = true;
-      } else {
-        const enrollment = await prisma.enrollment.findUnique({
-          where: {
-            userId_courseId: {
-              userId: user.id,
-              courseId: course.id,
-            },
+      const enrollment = await prisma.enrollment.findUnique({
+        where: {
+          userId_courseId: {
+            userId: user.id,
+            courseId: course.id,
           },
-        });
-        if (enrollment) {
-          isEnrolled = true;
-          progressPercent = enrollment.progressPercent;
-        }
+        },
+      });
+      if (enrollment) {
+        isEnrolled = true;
+        progressPercent = enrollment.progressPercent;
       }
     }
 

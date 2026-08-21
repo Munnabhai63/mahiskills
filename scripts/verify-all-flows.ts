@@ -174,10 +174,11 @@ async function runVerification() {
   const settings = await prisma.siteSetting.findMany();
   assert(settings.length >= 10, `Dynamic site settings populated (Count: ${settings.length})`);
 
-  // Cleanup test session booking and certificate
+  // Cleanup test session booking, progress, and certificate
   await prisma.sessionBooking.delete({ where: { id: firstBooking.id } });
   await prisma.certificate.delete({ where: { id: certificate.id } });
   await prisma.contactMessage.delete({ where: { id: msg.id } });
+  await prisma.lessonProgress.deleteMany({ where: { userId: testStudent!.id } });
 
   console.log(`\n========================================`);
   console.log(`🎉 ALL ${passed}/${total} AUTOMATED INTEGRATION TESTS PASSED!`);

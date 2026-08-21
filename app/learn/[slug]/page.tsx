@@ -222,8 +222,8 @@ export default function CourseLearningPlayer() {
     );
   }
 
-  // Access check
-  if (!course.isEnrolled && !currentLesson?.isPreview && user?.role !== 'ADMIN') {
+  // Access check — only enrolled students (or free preview lessons) can watch
+  if (!course.isEnrolled && !currentLesson?.isPreview) {
     return (
       <div className="min-h-screen bg-[#05080D] flex items-center justify-center p-4">
         <div className="max-w-md w-full p-8 rounded-3xl bg-[#0B1728] border border-[#D6A84F]/30 text-center space-y-6">

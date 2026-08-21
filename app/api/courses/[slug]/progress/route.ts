@@ -93,6 +93,23 @@ export async function POST(
       return NextResponse.json({ error: 'Course not found' }, { status: 404 });
     }
 
+    // Check if user is enrolled in this course
+    const existingEnrollment = await prisma.enrollment.findUnique({
+      where: {
+        userId_courseId: {
+          userId: user.id,
+          courseId: course.id,
+        },
+      },
+    });
+
+    if (!existingEnrollment) {
+      return NextResponse.json(
+        { error: 'You must be enrolled in this course to save progress' },
+        { status: 403 }
+      );
+    }
+
     // Upsert lesson progress
     await prisma.lessonProgress.upsert({
       where: {
@@ -129,23 +146,12 @@ export async function POST(
       ? Math.round((completedCount / allLessonIds.length) * 100)
       : 0;
 
-    // Update enrollment progress
-    await prisma.enrollment.upsert({
-      where: {
-        userId_courseId: {
-          userId: user.id,
-          courseId: course.id,
-        },
-      },
-      create: {
-        userId: user.id,
-        courseId: course.id,
+    // Update existing enrollment progress
+    await prisma.enrollment.update({
+      where: { id: existingEnrollment.id },
+      data: {
         progressPercent,
-        completedAt: progressPercent >= 100 ? new Date() : null,
-      },
-      update: {
-        progressPercent,
-        completedAt: progressPercent >= 100 ? new Date() : null,
+        completedAt: progressPercent >= 100 ? (existingEnrollment.completedAt || new Date()) : null,
       },
     });
 
